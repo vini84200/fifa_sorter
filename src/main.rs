@@ -41,8 +41,8 @@ fn main() -> Result<()>{
     // Timer
     let start = std::time::Instant::now();
 
-    let mut jogadores = HashTable::new(10000);
-    let mut users : HashTable<u32, User> = HashTable::new(1000000);
+    let mut jogadores = HashTable::new(22807);
+    let mut users : HashTable<u32, User> = HashTable::new(28800001);
 
 
     let mut reader = Reader::from_path("data/players.csv")?;
