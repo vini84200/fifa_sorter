@@ -2,13 +2,13 @@ use anyhow::{Result, anyhow};
 
 #[derive(Clone, Debug)]
 struct TableCell<K, V> {
-  item: Option<(K, V)>,
+  item: Vec<(K, V)>
 }
 
 impl<K, V> Default for TableCell<K, V> {
     fn default() -> Self {
         TableCell {
-            item: None
+            item: Vec::new()
         }
     }
 }
@@ -60,33 +60,19 @@ impl<K, V> HashTable<K, V>
 
   pub fn insert(&mut self, key: &K, value: V) -> Result<()> {
     let hash = self.rehash(key.hash());
-    if self.count == self.size {
-      return Err(anyhow!("Hash table is full /{}", self.size));
+    if let Some(i) = self.items.get_mut(hash) {
+      i.item.push((key.clone(), value));
     }
-
-    for i in 0..self.size {
-      if let Some(i) = self.items.get_mut((hash + i * 7 + i^2 * 13) % self.size) {
-        if i.item.is_none() {
-          i.item = Some((key.clone(), value));
-          self.count += 1;
-          return Ok(());
-        }
-      }
-    }
-    print!("{}", hash);
-    Err(anyhow!("Hash table is full {}/{}", self.count, self.size))
+    self.count += 1;
+    Ok(())
   }
 
   pub fn get(&self, key: &K) -> Option<V> {
-    let mut hash = self.rehash(key.hash());
-    for c in 0..self.size {
-      if let Some(i) = self.items.get((hash + c * 7 + c^2 * 13) % self.size) {
-        if i.item.is_some() {
-          if i.item.as_ref().unwrap().0 == *key {
-            return Some(i.item.as_ref().unwrap().1.clone());
-          }
-        } else {
-          return None;
+    let hash = self.rehash(key.hash());
+    if let Some(i) = self.items.get(hash) {
+      for a in &i.item {
+        if a.0 == *key {
+          return Some(a.1.clone());
         }
       }
     }
@@ -94,27 +80,11 @@ impl<K, V> HashTable<K, V>
   }
 
   pub fn get_mut(&mut self, key: &K) -> Option<&mut V> {
-    let mut hash = self.rehash(key.hash());
-    for c in 0..self.size {
-      if let Some(i) = self.items.get((hash + c * 7 + c^2 * 13) % self.size) {
-        if let Some(i) = &i.item {
-          if i.0 == *key {
-            hash = (hash + c * 7 + c^2 * 13) % self.size;
-            break;
-          }
-        } else {
-          return None;
-        }
-      }
-    }
+    let hash = self.rehash(key.hash());
     if let Some(i) = self.items.get_mut(hash) {
-      if let Some(i) = &mut i.item {
-        return Some(&mut i.1);
-      } else {
-        return None;
-      }
+      i.item.iter_mut().find(|a| a.0 == *key).map(|a| &mut a.1)
     } else {
-      return None;
+      None
     }
   }
 
@@ -135,16 +105,16 @@ mod test {
 
   #[test]
   fn insert() {
-    let mut table = HashTable::new(101);
-    assert! (table.insert(&"Peter Parker".to_string(), "SpiderMan".to_string()).is_ok());
-    assert! (table.insert(&"Tony Stark".to_string(), "IronMan".to_string()).is_ok());
+    let mut table = HashTable::new(2);
+    table.insert(&"Peter Parker".to_string(), "SpiderMan".to_string());
+    table.insert(&"Tony Stark".to_string(), "IronMan".to_string());
   }
 
   #[test]
   fn getting_elements() {
-    let mut table = HashTable::new(3);
-    assert! (table.insert(&"Peter Parker".to_string(), "SpiderMan".to_string()).is_ok());
-    assert! (table.insert(&"Tony Stark".to_string(), "IronMan".to_string()).is_ok());
+    let mut table = HashTable::new(1);
+    table.insert(&"Peter Parker".to_string(), "SpiderMan".to_string());
+    table.insert(&"Tony Stark".to_string(), "IronMan".to_string());
 
     println!("{:?}", table);
 

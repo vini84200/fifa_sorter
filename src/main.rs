@@ -1,6 +1,5 @@
 mod hash_table;
 
-use std::ptr::read;
 
 use crate::hash_table::HashTable;
 use csv::Reader;
