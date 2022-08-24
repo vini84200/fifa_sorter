@@ -62,6 +62,8 @@ impl<K, V> HashTable<K, V>
     let hash = self.rehash(key.hash());
     if let Some(i) = self.items.get_mut(hash) {
       i.item.push((key.clone(), value));
+    } else {
+      return Err(anyhow!("Error inserting item"));
     }
     self.count += 1;
     Ok(())

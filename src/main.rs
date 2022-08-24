@@ -10,7 +10,7 @@ use serde::Deserialize;
 struct Jogador {
     sofifa_id: u32,
     name: String,
-    player_positions: String,
+    player_positions: String
 }
 
 #[derive(Debug, Clone, Default)]
@@ -20,9 +20,10 @@ struct JogadorComRating {
     player_positions: String,
     rating: f32,
     rating_count: u32,
+    tags: Vec<String>,
 }
 
-#[derive(Debug, Clone, Default, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 struct Rating {
     user_id: u32,
     sofifa_id: u32,
@@ -34,15 +35,23 @@ struct User {
     ratings: Vec<Rating>,
 }
 
+#[derive(Debug, Clone, Default, Deserialize)]
+struct Tag {
+    user_id: u32,
+    sofifa_id: u32,
+    tag: String,
+}
+
 
 fn main() -> Result<()>{
 
     // Timer
     let start = std::time::Instant::now();
+    let start_total = std::time::Instant::now();
 
     let mut jogadores = HashTable::new(22807);
     let mut users : HashTable<u32, User> = HashTable::new(28800001);
-
+    let mut tags : HashTable<String, Vec<u32>> = HashTable::new(438001);
 
     let mut reader = Reader::from_path("data/players.csv")?;
     for result in reader.deserialize() {
@@ -53,10 +62,16 @@ fn main() -> Result<()>{
             player_positions: record.player_positions,
             rating: 0.0,
             rating_count: 0,
+            tags: Vec::new(),
         })?;
     }
 
+    let ellapsed = start.elapsed();
+    let start = std::time::Instant::now();
+    println!("Jogadores: {:?}", ellapsed);
+
     let mut count = 0;
+    
 
     let mut reader = Reader::from_path("data/rating.csv")?;
     for result in reader.deserialize() {
@@ -71,19 +86,42 @@ fn main() -> Result<()>{
             jogador.rating = ((jogador.rating * jogador.rating_count as f32) + score) / (jogador.rating_count as f32 + 1.0);
             jogador.rating_count += 1;
         }
-        if count % 100000 == 0 {
+        if count % 1000000 == 0 {
             println!("{}", count);
         }
         // println!("{}", id);
 
     }
 
-    let ellapsed = start.elapsed();
-    println!("{:?}", ellapsed);
 
+
+    let ellapsed = start.elapsed();
+    let start = std::time::Instant::now();
+    println!("Ratings: {:?}", ellapsed);
+    
+
+    let mut tag_reader = Reader::from_path("data/tags.csv")?;
+    for tag in tag_reader.deserialize() {
+        let tag: Tag = tag?;
+        if let Some(jogador) = jogadores.get_mut(&tag.sofifa_id) {
+            jogador.tags.push(tag.tag.clone());
+        }
+        if let Ok(user_tags) = tags.get_mut_or_default(&tag.tag) {
+            user_tags.push(tag.sofifa_id);
+        }
+    }
+
+    let ellapsed = start.elapsed();
+    // let start = std::time::Instant::now();
+    println!("Tags: {:?}", ellapsed);
+    let ellapsed = start_total.elapsed();
+    // let start = std::time::Instant::now();
+    println!("Total: {:?}", ellapsed);
     // println!("{:?}", jogadores);
     println!("{:?}", jogadores.get(&210212));
-    
+
+    println!("{:?}", tags.get(&"Brazil".to_string()));
+
 
     Ok(())
 }
