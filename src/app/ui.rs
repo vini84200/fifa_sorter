@@ -30,7 +30,7 @@ where
         .constraints([Constraint::Min(20), Constraint::Length(32)].as_ref())
         .split(chunks[1]);
 
-    let body = draw_body(false, app.state());
+    let body = draw_body(app.is_loading(), app.state());
     rect.render_widget(body, body_chunks[0]);
 
     let help = draw_help(app.actions());
@@ -61,15 +61,27 @@ fn check_size(rect: &Rect) {
 }
 
 fn draw_body<'a>(loading: bool, state: &AppState) -> Paragraph<'a> {
-    let loading_test = if loading { "Loading..." } else { "" };
+    let initalized_text = if state.is_initialized() {
+        "Initialized"
+    } else {
+        "Not Initialized !"
+    };
+    let loading_text = if loading { "Loading..." } else { "" };
+    let sleep_text = if let Some(sleeps) = state.count_sleep() {
+        format!("Sleep count: {}", sleeps)
+    } else {
+        String::default()
+    };
     let tick_text = if let Some(tick) = state.count_tick() {
         format!("Tick: {}", tick)
     } else {
         "".to_string()
     };
     Paragraph::new(vec![
-        Spans::from(loading_test),
-        Spans::from(tick_text),
+        Spans::from(Span::raw(initalized_text)),
+        Spans::from(Span::raw(loading_text)),
+        Spans::from(Span::raw(sleep_text)),
+        Spans::from(Span::raw(tick_text)),
     ])
     .style(Style::default().fg(Color::White))
     .alignment(Alignment::Left)

@@ -14,8 +14,9 @@ use crate::app::ui;
 use crate::inputs::events::Events;
 pub mod app;
 pub mod inputs;
+pub mod io;
 
-pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
+pub async fn start_ui(app: &Arc<tokio::sync::Mutex<App>>) -> Result<()> {
     // Configure Crossterm backend for tui
     let stdout = stdout();
     crossterm::terminal::enable_raw_mode()?;
@@ -25,20 +26,26 @@ pub fn start_ui(app: Rc<RefCell<App>>) -> Result<()> {
     terminal.hide_cursor()?;
 
     let tick_rate = Duration::from_millis(200);
-    let events = Events::new(tick_rate);
+    let mut events = Events::new(tick_rate);
+
+    {
+        let mut app = app.lock().await;
+        app.dispatch(io::IoEvent::Initialize).await;
+    }
 
     loop {
-        let mut app = app.borrow_mut();
+        let mut app = app.lock().await;
         // Render
         terminal.draw(|rect| ui::draw(rect, &app))?;
 
-        let result = match events.next()? {
-            InputEvent::Input(key) => app.do_action(key),
+        let result = match events.next().await {
+            InputEvent::Input(key) => app.do_action(key).await,
 
-            InputEvent::Tick => app.update_on_tick(),
+            InputEvent::Tick => app.update_on_tick().await,
         };
 
         if result == AppReturn::Exit {
+            events.close();
             break;
         }
     }

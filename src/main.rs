@@ -5,14 +5,26 @@ use crate::hash_table::HashTable;
 use fifa_sorter::app::App;
 use anyhow::Result;
 use fifa_sorter::start_ui;
-use std::{io, thread, time::Duration, rc::Rc, cell::RefCell};
+use fifa_sorter::io::handler::IoAsyncHandler;
+use fifa_sorter::io::IoEvent;
+use std::{io, thread, time::Duration, rc::Rc, cell::RefCell, sync::Arc};
 
+#[tokio::main]
+async fn main() -> Result<()> {
 
-fn main() -> Result<()>{
+    let (sync_io_tx, mut sync_io_rx) = tokio::sync::mpsc::channel::<IoEvent>(100);
 
-    let app = Rc::new(RefCell::new(App::new()));
+    let app = Arc::new(tokio::sync::Mutex::new(App::new(sync_io_tx.clone())));
+    let app_ui = Arc::clone(&app);
 
-    start_ui(app)?;
+    tokio::spawn(async move {
+        let mut handler = IoAsyncHandler::new(app);
+        while let Some(io_event) = sync_io_rx.recv().await {
+            handler.handle_io_event(io_event).await;
+        }
+    });
+
+    start_ui(&app_ui).await?;
 
     // // Timer
     // let start_total = std::time::Instant::now();
