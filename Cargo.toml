@@ -22,3 +22,4 @@ tokio = { version = "1", features = ["full"] }
 
 log = "0.4"
 tui-logger = "0.8"
+tui-textarea = "0.1.5"

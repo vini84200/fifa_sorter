@@ -1,6 +1,7 @@
 use std::fmt::{self, Display, Formatter};
 
 use crossterm::event;
+use tui_textarea::Input;
 
 /// Represents an key.
 #[derive(PartialEq, Eq, Clone, Copy, Hash, Debug)]
@@ -197,6 +198,93 @@ impl From<event::KeyEvent> for Key {
             } => Key::Char(c),
 
             _ => Key::Unknown,
+        }
+    }
+}
+
+impl Into<Input> for Key {
+    fn into(self) -> Input {
+        match self {
+            Key::Ctrl(c) => Input {
+                ctrl: true,
+                alt: false,
+                key: tui_textarea::Key::Char(c),
+            },
+            Key::Alt(c) => Input {
+                ctrl: false,
+                alt: true,
+                key: tui_textarea::Key::Char(c),
+            },
+            Key::Char(c) => Input {
+                ctrl: false,
+                alt: false,
+                key: tui_textarea::Key::Char(c),
+            },
+            Key::Esc => Input {
+                ctrl: false,
+                alt: false,
+                key: tui_textarea::Key::Esc,
+            },
+            Key::Backspace => Input {
+                ctrl: false,
+                alt: false,
+                key: tui_textarea::Key::Backspace,
+            },
+            Key::Left => Input {
+                ctrl: false,
+                alt: false,
+                key: tui_textarea::Key::Left,
+            },
+            Key::Right => Input {
+                ctrl: false,
+                alt: false,
+                key: tui_textarea::Key::Right,
+            },
+            Key::Up => Input {
+                ctrl: false,
+                alt: false,
+                key: tui_textarea::Key::Up,
+            },
+            Key::Down => Input {
+                ctrl: false,
+                alt: false,
+                key: tui_textarea::Key::Down,
+            },
+            Key::Home => Input {
+                ctrl: false,
+                alt: false,
+                key: tui_textarea::Key::Home,
+            },
+            Key::End => Input {
+                ctrl: false,
+                alt: false,
+                key: tui_textarea::Key::End,
+            },
+            Key::Enter =>   Input {
+                ctrl: false,
+                alt: false,
+                key: tui_textarea::Key::Enter,
+            },
+            Key::Tab => Input {
+                ctrl: false,
+                alt: false,
+                key: tui_textarea::Key::Tab,
+            },
+            Key::Ins =>  Input {
+                ctrl: false,
+                alt: false,
+                key: tui_textarea::Key::Null,
+            },
+            Key::Delete => Input {
+                ctrl: false,
+                alt: false,
+                key: tui_textarea::Key::Delete,
+            },
+            _ => Input {
+                ctrl: false,
+                alt: false,
+                key: tui_textarea::Key::Null,
+            },
         }
     }
 }

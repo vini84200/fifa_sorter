@@ -66,11 +66,10 @@ impl App {
         }
     }
 
-    /// We could update the app or dispatch event on tick
     pub async fn update_on_tick(&mut self) -> AppReturn {
-        // here we just increment a counter
         AppReturn::Continue
     }
+
     pub fn actions(&self) -> &Actions {
         &self.actions
     }
@@ -100,6 +99,15 @@ impl App {
 
     pub fn loading_message(&self) -> &str {
         &self.loading_message
+    }
+
+    pub fn is_capturing_input(&self) -> bool {
+        self.state.is_capturing_input()
+    }
+
+    pub fn capture_input(&mut self, key: Key) -> AppReturn{
+        self.state.capture_input(key);
+        AppReturn::Continue
     }
 
 }

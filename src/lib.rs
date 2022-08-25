@@ -7,6 +7,7 @@ use std::time::Duration;
 use anyhow::Result;
 use app::AppReturn;
 use inputs::InputEvent;
+use inputs::key::Key;
 use tui::Terminal;
 use tui::backend::CrosstermBackend;
 
@@ -44,7 +45,14 @@ pub async fn start_ui(app: &Arc<tokio::sync::Mutex<App>>) -> Result<()> {
         terminal.draw(|rect| ui::draw(rect, &app))?;
 
         let result = match events.next().await {
-            InputEvent::Input(key) => app.do_action(key).await,
+            
+            InputEvent::Input(key) => {
+                if app.is_capturing_input(){
+                    app.capture_input(key)
+                } else {
+                    app.do_action(key).await
+                }
+            },
 
             InputEvent::Tick => app.update_on_tick().await,
         };

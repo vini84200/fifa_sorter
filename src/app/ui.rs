@@ -2,6 +2,7 @@ use log::warn;
 use tui::{Frame, backend::Backend, layout::{Layout, Alignment, Direction, Constraint, Rect}, widgets::{Paragraph, Block, Borders, BorderType, Table, Row, Cell}, style::{Style, Color}, text::{Spans, Span}};
 use tui_logger::TuiLoggerWidget;
 
+use tui_textarea::{Input, Key, TextArea};
 use crate::app::App;
 
 use super::{state::AppState, actions::Actions};
@@ -41,8 +42,7 @@ where
         let body = draw_loading_body(app.is_loading(), app.state(), app.loading_message());
         rect.render_widget(body, body_chunks[0]);
     } else {
-        let body = draw_body(app.state());
-        rect.render_widget(body, body_chunks[0]);
+        draw_center(&body_chunks, app, rect);
     }
 
 
@@ -51,6 +51,19 @@ where
 
     let logs = draw_logs();
     rect.render_widget(logs, chunks[2]);
+}
+
+fn draw_center<B>(body_chunks: &Vec<Rect>, app: &App, rect: &mut Frame<B>) where B: Backend, {
+   let textarea = app.state().get_text_area().unwrap();
+
+    let some_chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Min(16), Constraint::Length(2)].as_ref())
+        .split(body_chunks[0]);
+    let input = textarea.widget();
+    rect.render_widget(input, some_chunks[0]);
+    let body = draw_body(app.state());
+    rect.render_widget(body, some_chunks[1]);
 }
 
 fn draw_title<'a>() -> Paragraph<'a> {
@@ -160,7 +173,7 @@ fn draw_logs<'a>() -> TuiLoggerWidget<'a> {
 }
 
 fn draw_body(state: &AppState) -> Table {
-    if let Some((jogadores, _, t)) = state.getTables() {
+    if let Some((jogadores, _, t)) = state.get_tables() {
         let mut rows = vec![];
         for j in t.get(&"Brazil".to_string()).unwrap_or(vec![]) {
             if let Some(jogador) = jogadores.get(&j) {
