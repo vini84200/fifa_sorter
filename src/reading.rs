@@ -1,5 +1,5 @@
 use csv::Reader;
-    use anyhow::anyhow;
+    
     use anyhow::Result;
     use crate::hash_table::HashTable;
     use serde::Deserialize;
@@ -43,7 +43,7 @@ use csv::Reader;
 
     pub(crate) fn read_tags(jogadores: &mut HashTable<u32, JogadorComRating>, tags: &mut HashTable<String, Vec<u32>>) -> Result<(), anyhow::Error> {
         let mut tag_reader = Reader::from_path("data/tags.csv")?;
-        Ok(for tag in tag_reader.deserialize() {
+        for tag in tag_reader.deserialize() {
             let tag: Tag = tag?;
             if let Some(jogador) = jogadores.get_mut(&tag.sofifa_id) {
                 jogador.tags.push(tag.tag.clone());
@@ -51,13 +51,14 @@ use csv::Reader;
             if let Ok(user_tags) = tags.get_mut_or_default(&tag.tag) {
                 user_tags.push(tag.sofifa_id);
             }
-        })
+        };
+        Ok(())
     }
 
     pub(crate) fn read_rating(mut users: HashTable<u32, User>, jogadores: &mut HashTable<u32, JogadorComRating>) -> Result<(), anyhow::Error> {
         // let mut count = 0;
         let mut reader = Reader::from_path("data/rating.csv")?;
-        Ok(for result in reader.deserialize() {
+        for result in reader.deserialize() {
             // count += 1;
             let record: Rating = result?;
             let id = record.sofifa_id;
@@ -79,12 +80,13 @@ use csv::Reader;
             // }
             // println!("{}", id);
 
-        })
+        };
+        Ok(())
     }
 
     pub(crate) fn read_jogadores(jogadores: &mut HashTable<u32, JogadorComRating>) -> Result<(), anyhow::Error> {
         let mut reader = Reader::from_path("data/players.csv")?;
-        Ok(for result in reader.deserialize() {
+        for result in reader.deserialize() {
             let record: Jogador = result?;
             jogadores.insert(&record.sofifa_id, JogadorComRating {
                 sofifa_id: record.sofifa_id,
@@ -94,5 +96,6 @@ use csv::Reader;
                 rating_count: 0,
                 tags: Vec::new(),
             })?;
-        })
+        };
+        Ok(())
     }

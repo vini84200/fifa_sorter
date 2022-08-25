@@ -1,14 +1,14 @@
 mod hash_table;
 mod reading;
 
-use crate::hash_table::HashTable;
+
 use fifa_sorter::app::App;
 use anyhow::Result;
 use fifa_sorter::start_ui;
 use fifa_sorter::io::handler::IoAsyncHandler;
 use fifa_sorter::io::IoEvent;
 use log::LevelFilter;
-use std::{io, thread, time::Duration, rc::Rc, cell::RefCell, sync::Arc};
+use std::{sync::Arc};
 
 #[tokio::main]
 async fn main() -> Result<()> {

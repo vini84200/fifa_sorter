@@ -3,7 +3,7 @@ use self::app::App;
 use std::io::stdout;
 use std::sync::Arc;
 use std::time::Duration;
-use std::{rc::Rc, cell::RefCell};
+
 use anyhow::Result;
 use app::AppReturn;
 use inputs::InputEvent;
