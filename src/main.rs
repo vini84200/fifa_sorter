@@ -7,6 +7,7 @@ use anyhow::Result;
 use fifa_sorter::start_ui;
 use fifa_sorter::io::handler::IoAsyncHandler;
 use fifa_sorter::io::IoEvent;
+use log::LevelFilter;
 use std::{io, thread, time::Duration, rc::Rc, cell::RefCell, sync::Arc};
 
 #[tokio::main]
@@ -16,6 +17,10 @@ async fn main() -> Result<()> {
 
     let app = Arc::new(tokio::sync::Mutex::new(App::new(sync_io_tx.clone())));
     let app_ui = Arc::clone(&app);
+
+    // Configue log
+    tui_logger::init_logger(LevelFilter::Debug).unwrap();
+    tui_logger::set_default_level(log::LevelFilter::Debug);
 
     tokio::spawn(async move {
         let mut handler = IoAsyncHandler::new(app);

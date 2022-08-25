@@ -17,8 +17,8 @@ anyhow = "1"
 crossterm = { version = "0.25", features = [ "serde" ] }
 chrono = { version = "0.4", features = ["serde"] }
 rand = { version = "0.8.5", default-features = false, features = ["std"] }
-tui = { version = "0.19", default-features = false, features = ['crossterm', 'serde'] }
+tui = { version = "0.18", default-features = false, features = ['crossterm', 'serde'] }
 tokio = { version = "1", features = ["full"] }
 
 log = "0.4"
-tui-logger = { git = "https://github.com/gin66/tui-logger", rev = "3a3568e2464dddc2205e071234135998342d7f1d" }
+tui-logger = "0.8"

@@ -1,4 +1,5 @@
 use tui::{Frame, backend::Backend, layout::{Layout, Alignment, Direction, Constraint, Rect}, widgets::{Paragraph, Block, Borders, BorderType, Table, Row, Cell}, style::{Style, Color}, text::{Spans, Span}};
+use tui_logger::TuiLoggerWidget;
 
 use crate::app::App;
 
@@ -15,7 +16,12 @@ where
     // Vertical layout
     let chunks = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Length(3), Constraint::Min(10)].as_ref())
+        .constraints(
+            [
+                Constraint::Length(3),
+                Constraint::Min(10),
+                Constraint::Length(12)
+            ].as_ref())
         .split(size);
 
     // print!("{}", chunks.len());
@@ -35,6 +41,9 @@ where
 
     let help = draw_help(app.actions());
     rect.render_widget(help, body_chunks[1]);
+
+    let logs = draw_logs();
+    rect.render_widget(logs, chunks[2]);
 }
 
 fn draw_title<'a>() -> Paragraph<'a> {
@@ -125,4 +134,20 @@ fn draw_help(actions: &Actions) -> Table {
         )
         .widths(&[Constraint::Length(11), Constraint::Min(20)])
         .column_spacing(1)
+}
+
+fn draw_logs<'a>() -> TuiLoggerWidget<'a> {
+    TuiLoggerWidget::default()
+        .style_error(Style::default().fg(Color::Red))
+        .style_debug(Style::default().fg(Color::Green))
+        .style_warn(Style::default().fg(Color::Yellow))
+        .style_trace(Style::default().fg(Color::Gray))
+        .style_info(Style::default().fg(Color::Blue))
+        .block(
+            Block::default()
+                .title("Logs")
+                .border_style(Style::default().fg(Color::White).bg(Color::Black))
+                .borders(Borders::ALL),
+        )
+        .style(Style::default().fg(Color::White).bg(Color::Black))
 }
