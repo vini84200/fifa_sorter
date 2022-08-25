@@ -1,6 +1,5 @@
 mod hash_table;
 
-
 use crate::hash_table::HashTable;
 use csv::Reader;
 use anyhow::Result;
@@ -54,28 +53,55 @@ fn main() -> Result<()>{
     let mut users : HashTable<u32, User> = HashTable::new(28800001);
     let mut tags : HashTable<String, Vec<u32>> = HashTable::new(438001);
 
-    let mut reader = Reader::from_path("data/players.csv")?;
-    for result in reader.deserialize() {
-        let record: Jogador = result?;
-        jogadores.insert(&record.sofifa_id, JogadorComRating {
-            sofifa_id: record.sofifa_id,
-            name: record.name,
-            player_positions: record.player_positions,
-            rating: 0.0,
-            rating_count: 0,
-            tags: Vec::new(),
-        })?;
-    }
+    read_jogadores(&mut jogadores)?;
 
     let ellapsed = start.elapsed();
     let start = std::time::Instant::now();
     println!("Jogadores: {:?}", ellapsed);
 
+    read_rating(users, &mut jogadores)?;
+
+
+    let ellapsed = start.elapsed();
+    let start = std::time::Instant::now();
+    println!("Ratings: {:?}", ellapsed);
+
+
+    read_tags(&mut jogadores, &mut tags)?;
+
+    let ellapsed = start.elapsed();
+    println!("Tags: {:?}", ellapsed);
+
+    let ellapsed = start_total.elapsed();
+    println!("Total: {:?}", ellapsed);
+    // println!("{:?}", jogadores);
+    // println!("{:?}", jogadores.get(&210212));
+    // for j in tags.get(&"Brazil".to_string()).unwrap() {
+    //     // println!("{}", jogadores.get(&j).unwrap().name);
+    // }
+    // // println!("{:?}", );
+
+
+    Ok(())
+}
+
+fn read_tags(jogadores: &mut HashTable<u32, JogadorComRating>, tags: &mut HashTable<String, Vec<u32>>) -> Result<(), anyhow::Error> {
+    let mut tag_reader = Reader::from_path("data/tags.csv")?;
+    Ok(for tag in tag_reader.deserialize() {
+        let tag: Tag = tag?;
+        if let Some(jogador) = jogadores.get_mut(&tag.sofifa_id) {
+            jogador.tags.push(tag.tag.clone());
+        }
+        if let Ok(user_tags) = tags.get_mut_or_default(&tag.tag) {
+            user_tags.push(tag.sofifa_id);
+        }
+    })
+}
+
+fn read_rating(mut users: HashTable<u32, User>, jogadores: &mut HashTable<u32, JogadorComRating>) -> Result<(), anyhow::Error> {
     let mut count = 0;
-
-
     let mut reader = Reader::from_path("data/rating.csv")?;
-    for result in reader.deserialize() {
+    Ok(for result in reader.deserialize() {
         count += 1;
         let record: Rating = result?;
         let id = record.sofifa_id;
@@ -97,39 +123,20 @@ fn main() -> Result<()>{
         }
         // println!("{}", id);
 
-    }
+    })
+}
 
-
-
-    let ellapsed = start.elapsed();
-    let start = std::time::Instant::now();
-    println!("Ratings: {:?}", ellapsed);
-
-
-    let mut tag_reader = Reader::from_path("data/tags.csv")?;
-    for tag in tag_reader.deserialize() {
-        let tag: Tag = tag?;
-        if let Some(jogador) = jogadores.get_mut(&tag.sofifa_id) {
-            jogador.tags.push(tag.tag.clone());
-        }
-        if let Ok(user_tags) = tags.get_mut_or_default(&tag.tag) {
-            user_tags.push(tag.sofifa_id);
-        }
-    }
-
-    let ellapsed = start.elapsed();
-    // let start = std::time::Instant::now();
-    println!("Tags: {:?}", ellapsed);
-    let ellapsed = start_total.elapsed();
-    // let start = std::time::Instant::now();
-    println!("Total: {:?}", ellapsed);
-    // println!("{:?}", jogadores);
-    println!("{:?}", jogadores.get(&210212));
-    for j in tags.get(&"Brazil".to_string()).unwrap() {
-        // println!("{}", jogadores.get(&j).unwrap().name);
-    }
-    // println!("{:?}", );
-
-
-    Ok(())
+fn read_jogadores(jogadores: &mut HashTable<u32, JogadorComRating>) -> Result<(), anyhow::Error> {
+    let mut reader = Reader::from_path("data/players.csv")?;
+    Ok(for result in reader.deserialize() {
+        let record: Jogador = result?;
+        jogadores.insert(&record.sofifa_id, JogadorComRating {
+            sofifa_id: record.sofifa_id,
+            name: record.name,
+            player_positions: record.player_positions,
+            rating: 0.0,
+            rating_count: 0,
+            tags: Vec::new(),
+        })?;
+    })
 }
