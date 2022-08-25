@@ -32,6 +32,7 @@ struct Rating {
 
 #[derive(Debug, Clone, Default)]
 struct User {
+    user_id: u32,
     ratings: Vec<Rating>,
 }
 
@@ -71,7 +72,7 @@ fn main() -> Result<()>{
     println!("Jogadores: {:?}", ellapsed);
 
     let mut count = 0;
-    
+
 
     let mut reader = Reader::from_path("data/rating.csv")?;
     for result in reader.deserialize() {
@@ -79,8 +80,13 @@ fn main() -> Result<()>{
         let record: Rating = result?;
         let id = record.sofifa_id;
         let score = record.rating;
-        if let Ok(user)  = users.get_mut_or_default(&record.user_id) {
+        if let Some(user) = users.get_mut(&record.user_id ) {
             user.ratings.push(record);
+        } else {
+            users.insert(&record.user_id, User {
+                user_id: record.user_id,
+                ratings: vec![record.clone()]
+            })?;
         }
         if let Some(jogador) = jogadores.get_mut(&id) {
             jogador.rating = ((jogador.rating * jogador.rating_count as f32) + score) / (jogador.rating_count as f32 + 1.0);
@@ -98,7 +104,7 @@ fn main() -> Result<()>{
     let ellapsed = start.elapsed();
     let start = std::time::Instant::now();
     println!("Ratings: {:?}", ellapsed);
-    
+
 
     let mut tag_reader = Reader::from_path("data/tags.csv")?;
     for tag in tag_reader.deserialize() {
@@ -119,8 +125,10 @@ fn main() -> Result<()>{
     println!("Total: {:?}", ellapsed);
     // println!("{:?}", jogadores);
     println!("{:?}", jogadores.get(&210212));
-
-    println!("{:?}", tags.get(&"Brazil".to_string()));
+    for j in tags.get(&"Brazil".to_string()).unwrap() {
+        // println!("{}", jogadores.get(&j).unwrap().name);
+    }
+    // println!("{:?}", );
 
 
     Ok(())
