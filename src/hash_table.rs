@@ -98,7 +98,6 @@ impl<K, V> HashTable<K, V>
       self.get_mut(key).ok_or(anyhow!("Could not get mut or default"))
     }
   }
- 
 }
 
 #[cfg(test)]

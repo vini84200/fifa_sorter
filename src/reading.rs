@@ -46,10 +46,18 @@ pub async fn read_tags(jogadores: &mut HashTable<u32, JogadorComRating>, tags: &
     for tag in tag_reader.deserialize() {
         let tag: Tag = tag?;
         if let Some(jogador) = jogadores.get_mut(&tag.sofifa_id) {
+            //Has tag?
+            if !jogador.tags.contains(&tag.tag) {
+                jogador.tags.push(tag.tag.clone());
+            }
             jogador.tags.push(tag.tag.clone());
         }
-        if let Ok(user_tags) = tags.get_mut_or_default(&tag.tag) {
-            user_tags.push(tag.sofifa_id);
+        if let Some(jogadores) = tags.get_mut(&tag.tag) {
+            if !jogadores.contains(&tag.sofifa_id) {
+                jogadores.push(tag.sofifa_id);
+            }
+        } else {
+            tags.insert(&tag.tag, vec![tag.sofifa_id])?;
         }
     };
     Ok(())

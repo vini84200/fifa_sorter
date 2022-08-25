@@ -50,6 +50,19 @@ impl AppState {
         }
     }
 
+    pub fn getTables(&self) -> Option<(&HashTable<u32, reading::JogadorComRating>, &HashTable<u32, reading::User>, &HashTable<String, Vec<u32>>)> {
+        match self {
+            Self::Initialized
+                {
+                    jogadores,
+                    users,
+                    tags,
+                    ..
+                } => Some((jogadores, users, tags)),
+            _ => None,
+        }
+    }
+
 }
 
 impl Default for AppState {

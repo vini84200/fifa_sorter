@@ -1,3 +1,4 @@
+use log::warn;
 use tui::{Frame, backend::Backend, layout::{Layout, Alignment, Direction, Constraint, Rect}, widgets::{Paragraph, Block, Borders, BorderType, Table, Row, Cell}, style::{Style, Color}, text::{Spans, Span}};
 use tui_logger::TuiLoggerWidget;
 
@@ -36,8 +37,14 @@ where
         .constraints([Constraint::Min(20), Constraint::Length(32)].as_ref())
         .split(chunks[1]);
 
-    let body = draw_body(app.is_loading(), app.state(), app.loading_message());
-    rect.render_widget(body, body_chunks[0]);
+    if app.is_loading {
+        let body = draw_loading_body(app.is_loading(), app.state(), app.loading_message());
+        rect.render_widget(body, body_chunks[0]);
+    } else {
+        let body = draw_body(app.state());
+        rect.render_widget(body, body_chunks[0]);
+    }
+
 
     let help = draw_help(app.actions());
     rect.render_widget(help, body_chunks[1]);
@@ -69,7 +76,7 @@ fn check_size(rect: &Rect) {
     }
 }
 
-fn draw_body<'a>(loading: bool, state: &AppState, loading_message: &'a str) -> Paragraph<'a> {
+fn draw_loading_body<'a>(loading: bool, state: &AppState, loading_message: &'a str) -> Paragraph<'a> {
     let initalized_text = if state.is_initialized() {
         format!("Initialized in {:.3} s", state.initialized_in().as_secs_f64())
     } else {
@@ -150,4 +157,33 @@ fn draw_logs<'a>() -> TuiLoggerWidget<'a> {
                 .borders(Borders::ALL),
         )
         .style(Style::default().fg(Color::White).bg(Color::Black))
+}
+
+fn draw_body(state: &AppState) -> Table {
+    if let Some((jogadores, _, t)) = state.getTables() {
+        let mut rows = vec![];
+        for j in t.get(&"Brazil".to_string()).unwrap_or(vec![]) {
+            if let Some(jogador) = jogadores.get(&j) {
+                let row = Row::new(vec![
+                    Cell::from(jogador.name.to_string()),
+                    Cell::from(jogador.player_positions.to_string()),
+                    Cell::from(format!("{:.1}", jogador.rating)),
+                ]);
+                rows.push(row);
+            }
+        }
+        Table::new(rows)
+            .style(Style::default().fg(Color::White))
+            .block(
+                Block::default()
+                    .borders(Borders::ALL)
+                    .border_type(BorderType::Plain)
+                    .title("Jogadores"),
+            )
+            .widths(&[Constraint::Min(30), Constraint::Min(20), Constraint::Min(10)])
+    } else {
+        warn!("No tables");
+        Table::new(vec![])
+            .style(Style::default().bg(Color::Red))
+    }
 }
