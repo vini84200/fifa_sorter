@@ -36,7 +36,7 @@ where
         .constraints([Constraint::Min(20), Constraint::Length(32)].as_ref())
         .split(chunks[1]);
 
-    let body = draw_body(app.is_loading(), app.state());
+    let body = draw_body(app.is_loading(), app.state(), app.loading_message());
     rect.render_widget(body, body_chunks[0]);
 
     let help = draw_help(app.actions());
@@ -47,7 +47,7 @@ where
 }
 
 fn draw_title<'a>() -> Paragraph<'a> {
-    Paragraph::new("Plop with TUI")
+    Paragraph::new("⚽ Fifa Search")
         .style(Style::default().fg(Color::LightCyan))
         .alignment(Alignment::Center)
         .block(
@@ -69,28 +69,28 @@ fn check_size(rect: &Rect) {
     }
 }
 
-fn draw_body<'a>(loading: bool, state: &AppState) -> Paragraph<'a> {
+fn draw_body<'a>(loading: bool, state: &AppState, loading_message: &'a str) -> Paragraph<'a> {
     let initalized_text = if state.is_initialized() {
-        "Initialized"
+        format!("Initialized in {:.3} s", state.initialized_in().as_secs_f64())
     } else {
-        "Not Initialized !"
+        "Not Initialized !".to_owned()
     };
-    let loading_text = if loading { "Loading..." } else { "" };
-    let sleep_text = if let Some(sleeps) = state.count_sleep() {
-        format!("Sleep count: {}", sleeps)
-    } else {
-        String::default()
-    };
-    let tick_text = if let Some(tick) = state.count_tick() {
-        format!("Tick: {}", tick)
-    } else {
-        "".to_string()
-    };
+    let loading_text = if loading { loading_message } else { "" };
+    // let sleep_text = if let Some(sleeps) = state.count_sleep() {
+    //     format!("Sleep count: {}", sleeps)
+    // } else {
+    //     String::default()
+    // };
+    // let tick_text = if let Some(tick) = state.count_tick() {
+    //     format!("Tick: {}", tick)
+    // } else {
+    //     "".to_string()
+    // };
     Paragraph::new(vec![
         Spans::from(Span::raw(initalized_text)),
         Spans::from(Span::raw(loading_text)),
-        Spans::from(Span::raw(sleep_text)),
-        Spans::from(Span::raw(tick_text)),
+        // Spans::from(Span::raw(sleep_text)),
+        // Spans::from(Span::raw(tick_text)),
     ])
     .style(Style::default().fg(Color::White))
     .alignment(Alignment::Left)

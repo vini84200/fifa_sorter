@@ -1,25 +1,41 @@
+use std::default;
 use std::time::Duration;
+use crate::hash_table::HashTable;
+use crate::reading;
 
+#[derive(Debug, Clone, Default)]
+pub enum AppPage {
+    #[default]
+    Home,
+    Loading,
+    Error,
+}
 
 #[derive(Clone)]
 pub enum AppState {
     Init,
+    Initializing {
+        progress: f32,
+        message: String,
+        start: std::time::Instant,
+    },
     Initialized {
+        jogadores: HashTable<u32, reading::JogadorComRating>,
+        users: HashTable<u32, reading::User>,
+        tags: HashTable<String, Vec<u32>>,
         duration: Duration,
-        counter_sleep: u32,
-        counter_tick: u64,
+        page: AppPage
     },
 }
 
 impl AppState {
-    pub fn initialized() -> Self {
-        let duration = Duration::from_secs(1);
-        let counter_sleep = 0;
-        let counter_tick = 0;
+    pub fn initialized(jogadores: HashTable<u32, reading::JogadorComRating>, users: HashTable<u32, reading::User>, tags: HashTable<String, Vec<u32>>, timer: Duration) -> Self {
         Self::Initialized {
-            duration,
-            counter_sleep,
-            counter_tick,
+            jogadores,
+            users,
+            tags,
+            duration: timer,
+            page: AppPage::Home
         }
     }
 
@@ -27,57 +43,13 @@ impl AppState {
         matches!(self, &Self::Initialized { .. })
     }
 
-    pub fn incr_sleep(&mut self) {
-        if let Self::Initialized { counter_sleep, .. } = self {
-            *counter_sleep += 1;
+    pub fn initialized_in (&self) -> Duration {
+        match self {
+            Self::Initialized { duration, .. } => *duration,
+            _ => Duration::from_secs(0),
         }
     }
 
-    pub fn incr_tick(&mut self) {
-        if let Self::Initialized { counter_tick, .. } = self {
-            *counter_tick += 1;
-        }
-    }
-
-    pub fn count_sleep(&self) -> Option<u32> {
-        if let Self::Initialized { counter_sleep, .. } = self {
-            Some(*counter_sleep)
-        } else {
-            None
-        }
-    }
-
-    pub fn count_tick(&self) -> Option<u64> {
-        if let Self::Initialized { counter_tick, .. } = self {
-            Some(*counter_tick)
-        } else {
-            None
-        }
-    }
-
-    pub fn duration(&self) -> Option<&Duration> {
-        if let Self::Initialized { duration, .. } = self {
-            Some(duration)
-        } else {
-            None
-        }
-    }
-
-    pub fn increment_delay(&mut self) {
-        if let Self::Initialized { duration, .. } = self {
-            // Set the duration, note that the duration is in 1s..10s
-            let secs = (duration.as_secs() + 1).clamp(1, 10);
-            *duration = Duration::from_secs(secs);
-        }
-    }
-
-    pub fn decrement_delay(&mut self) {
-        if let Self::Initialized { duration, .. } = self {
-            // Set the duration, note that the duration is in 1s..10s
-            let secs = (duration.as_secs() - 1).clamp(1, 10);
-            *duration = Duration::from_secs(secs);
-        }
-    }
 }
 
 impl Default for AppState {

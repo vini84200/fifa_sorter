@@ -1,6 +1,9 @@
-use log::{debug, warn, error};
+use log::{debug, warn, error, info};
 
 use crate::{inputs::key::Key, io::IoEvent};
+use crate::hash_table::HashTable;
+use crate::reading;
+use std::time::Duration;
 
 use self::{state::AppState, actions::Actions};
 
@@ -23,6 +26,7 @@ pub struct App {
     actions: Actions,
 
     is_loading: bool,
+    loading_message: String,
     io_tx: tokio::sync::mpsc::Sender<IoEvent>,
 }
 
@@ -36,6 +40,7 @@ impl App {
             actions,
             is_loading,
             io_tx,
+            loading_message: String::new(),
         }
     }
 
@@ -47,19 +52,13 @@ impl App {
             error!("Error from dispatch {}", e);
         };
     }
-    
+
     /// Handle a user action
     pub async fn do_action(&mut self, key: Key) -> AppReturn {
         if let Some(action) = self.actions.find(key) {
             debug!("Run action [{:?}]", action);
             match action {
                 Action::Quit => AppReturn::Exit,
-                Action::Sleep => {
-                    if let Some(duration) = self.state.duration().cloned() {
-                        self.dispatch(IoEvent::Sleep(duration)).await;
-                    };
-                    AppReturn::Continue
-                }
             }
         } else {
             warn!("No action accociated to {}", key);
@@ -70,7 +69,6 @@ impl App {
     /// We could update the app or dispatch event on tick
     pub async fn update_on_tick(&mut self) -> AppReturn {
         // here we just increment a counter
-        self.state.incr_tick();
         AppReturn::Continue
     }
     pub fn actions(&self) -> &Actions {
@@ -86,18 +84,22 @@ impl App {
         self.is_loading
     }
 
-    pub fn initialized(&mut self) {
+    pub fn initialized(&mut self, jogadores: HashTable<u32, reading::JogadorComRating>, users: HashTable<u32, reading::User>, tags: HashTable<String, Vec<u32>>, timer: Duration) {
         // Update contextual actions
-        self.actions = vec![Action::Quit, Action::Sleep].into();
-        self.state = AppState::initialized()
+        self.state = AppState::initialized(jogadores, users, tags, timer);
     }
 
     pub fn loaded(&mut self) {
         self.is_loading = false;
     }
 
-    pub fn sleeped(&mut self) {
-        self.state.incr_sleep();
+    pub fn set_loading_message(&mut self, message: String) {
+        info!("...: {}", message);
+        self.loading_message = message;
+    }
+
+    pub fn loading_message(&self) -> &str {
+        &self.loading_message
     }
 
 }

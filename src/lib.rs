@@ -10,11 +10,16 @@ use inputs::InputEvent;
 use tui::Terminal;
 use tui::backend::CrosstermBackend;
 
+
 use crate::app::ui;
 use crate::inputs::events::Events;
+
+pub mod reading;
+pub mod hash_table;
 pub mod app;
 pub mod inputs;
 pub mod io;
+
 
 pub async fn start_ui(app: &Arc<tokio::sync::Mutex<App>>) -> Result<()> {
     // Configure Crossterm backend for tui
