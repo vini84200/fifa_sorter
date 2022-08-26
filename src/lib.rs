@@ -7,7 +7,6 @@ use std::time::Duration;
 use anyhow::Result;
 use app::AppReturn;
 use inputs::InputEvent;
-use inputs::key::Key;
 use tui::Terminal;
 use tui::backend::CrosstermBackend;
 

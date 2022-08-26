@@ -41,8 +41,9 @@ impl Hashable for u32 {
   }
 }
 
-impl<K, V> HashTable<K, V> 
-  where 
+#[allow(dead_code)]
+impl<K, V> HashTable<K, V>
+  where
     K: Clone + Default + Hashable + PartialEq,
     V: Clone + Default
 {
@@ -95,7 +96,7 @@ impl<K, V> HashTable<K, V>
       Ok(self.get_mut(key).unwrap())
     } else {
       self.insert(key, Default::default())?;
-      self.get_mut(key).ok_or(anyhow!("Could not get mut or default"))
+      self.get_mut(key).ok_or_else(|| anyhow!("Could not get mut or default"))
     }
   }
 }
@@ -107,15 +108,15 @@ mod test {
   #[test]
   fn insert() {
     let mut table = HashTable::new(2);
-    table.insert(&"Peter Parker".to_string(), "SpiderMan".to_string());
-    table.insert(&"Tony Stark".to_string(), "IronMan".to_string());
+    table.insert(&"Peter Parker".to_string(), "SpiderMan".to_string()).unwrap();
+    table.insert(&"Tony Stark".to_string(), "IronMan".to_string()).unwrap();
   }
 
   #[test]
   fn getting_elements() {
     let mut table = HashTable::new(1);
-    table.insert(&"Peter Parker".to_string(), "SpiderMan".to_string());
-    table.insert(&"Tony Stark".to_string(), "IronMan".to_string());
+    table.insert(&"Peter Parker".to_string(), "SpiderMan".to_string()).unwrap();
+    table.insert(&"Tony Stark".to_string(), "IronMan".to_string()).unwrap();
 
     println!("{:?}", table);
 

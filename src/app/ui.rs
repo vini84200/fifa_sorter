@@ -1,8 +1,6 @@
 use log::warn;
 use tui::{Frame, backend::Backend, layout::{Layout, Alignment, Direction, Constraint, Rect}, widgets::{Paragraph, Block, Borders, BorderType, Table, Row, Cell}, style::{Style, Color}, text::{Spans, Span}};
 use tui_logger::TuiLoggerWidget;
-
-use tui_textarea::{Input, Key, TextArea};
 use crate::app::App;
 
 use super::{state::AppState, actions::Actions};
