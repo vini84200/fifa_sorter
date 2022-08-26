@@ -105,9 +105,11 @@ impl App {
         self.state.is_capturing_input()
     }
 
-    pub fn capture_input(&mut self, key: Key) -> AppReturn{
-        self.state.capture_input(key);
-        AppReturn::Continue
+    pub async fn capture_input(&mut self, key: Key) -> AppReturn{
+        match key {
+            Key::Ctrl(_) => self.do_action(key).await,
+            _ => {self.state.capture_input(key); AppReturn::Continue}
+        }
     }
 
 }
