@@ -11,7 +11,7 @@ opt-level = 3
 
 
 [dependencies]
-csv = "1.1"
+# csv = "1.1"
 serde = { version = "1", features = ["derive"] }
 anyhow = "1"
 crossterm = { version = "0.25", features = [ "serde" ] }
@@ -23,5 +23,5 @@ tokio = { version = "1", features = ["full"] }
 log = "0.4"
 tui-logger = "0.8"
 tui-textarea = "0.1.5"
-# TODO: Use tui-realm for easier layout management,  https://github.com/veeso/tui-realm#about-tui-realm-
-# tui-realm = "1.8"
+csv-async = {version = "1.2", features = ["with_serde", "tokio"]}
+tokio-stream = "0.1"
