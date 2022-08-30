@@ -37,7 +37,8 @@ impl Hashable for String {
 
 impl Hashable for u32 {
   fn hash(&self) -> usize {
-    *self as usize
+    // 17s^2
+    17 * (*self ^ 2) as usize
   }
 }
 

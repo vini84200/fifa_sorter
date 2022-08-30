@@ -3,7 +3,7 @@ use anyhow::{Result, anyhow};
 use tokio::fs::File;
 use crate::structures::hash_table::HashTable;
 use serde::Deserialize;
-use tokio_stream::{self as stream, StreamExt};
+use tokio_stream::StreamExt;
 
 #[derive(Debug, Clone, Default, Deserialize)]
 struct Jogador {
