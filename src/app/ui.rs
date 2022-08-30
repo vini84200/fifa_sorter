@@ -52,16 +52,16 @@ where
 }
 
 fn draw_center<B>(body_chunks: &Vec<Rect>, app: &App, rect: &mut Frame<B>) where B: Backend, {
-   let textarea = app.state().get_text_area().unwrap();
+    // let textarea = app.state().get_text_area().unwrap();
 
-    let some_chunks = Layout::default()
+    /* let some_chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([Constraint::Min(16), Constraint::Length(2)].as_ref())
         .split(body_chunks[0]);
     let input = textarea.widget();
-    rect.render_widget(input, some_chunks[0]);
+    rect.render_widget(input, some_chunks[0]);*/
     let body = draw_body(app.state());
-    rect.render_widget(body, some_chunks[1]);
+    rect.render_widget(body, body_chunks[0]);
 }
 
 fn draw_title<'a>() -> Paragraph<'a> {
@@ -173,7 +173,7 @@ fn draw_logs<'a>() -> TuiLoggerWidget<'a> {
 fn draw_body(state: &AppState) -> Table {
     if let Some((jogadores, _, t)) = state.get_tables() {
         let mut rows = vec![];
-        for j in t.get(&"Brazil".to_string()).unwrap_or(vec![]) {
+        for j in t.get(&"Grêmio".to_string()).unwrap_or(vec![]) {
             if let Some(jogador) = jogadores.get(&j) {
                 let row = Row::new(vec![
                     Cell::from(jogador.name.to_string()),

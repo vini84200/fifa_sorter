@@ -1,4 +1,4 @@
-mod hash_table;
+mod structures;
 mod reading;
 
 

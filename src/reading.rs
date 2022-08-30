@@ -1,7 +1,7 @@
 use csv_async::AsyncDeserializer;
 use anyhow::{Result, anyhow};
 use tokio::fs::File;
-use crate::hash_table::HashTable;
+use crate::structures::hash_table::HashTable;
 use serde::Deserialize;
 use tokio_stream::{self as stream, StreamExt};
 

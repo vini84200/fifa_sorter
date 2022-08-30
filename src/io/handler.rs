@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use crate::hash_table::HashTable;
+use crate::structures::hash_table::HashTable;
 
 use log::{error, info};
 

@@ -14,8 +14,8 @@ use tui::backend::CrosstermBackend;
 use crate::app::ui;
 use crate::inputs::events::Events;
 
+pub mod structures;
 pub mod reading;
-pub mod hash_table;
 pub mod app;
 pub mod inputs;
 pub mod io;

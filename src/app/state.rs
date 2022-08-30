@@ -3,7 +3,7 @@ use std::time::Duration;
 use log::info;
 use tui_textarea::TextArea;
 
-use crate::hash_table::HashTable;
+use crate::structures::hash_table::HashTable;
 use crate::inputs::key::Key;
 use crate::reading;
 

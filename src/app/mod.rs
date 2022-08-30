@@ -1,7 +1,7 @@
 use log::{debug, warn, error, info};
 
 use crate::{inputs::key::Key, io::IoEvent};
-use crate::hash_table::HashTable;
+use crate::structures::hash_table::HashTable;
 use crate::reading;
 use std::time::Duration;
 
