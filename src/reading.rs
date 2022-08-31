@@ -1,9 +1,7 @@
-use csv_async::AsyncDeserializer;
+use csv::Reader;
 use anyhow::{Result, anyhow};
-use tokio::fs::File;
 use crate::structures::hash_table::HashTable;
 use serde::Deserialize;
-use tokio_stream::StreamExt;
 
 #[derive(Debug, Clone, Default, Deserialize)]
 struct Jogador {
@@ -41,78 +39,64 @@ pub struct Tag {
 
 #[allow(dead_code)]
 pub async fn read_tags(jogadores: &mut HashTable<u32, JogadorComRating>, tags: &mut HashTable<String, Vec<u32>>) -> Result<(), anyhow::Error> {
-    // let mut tag_reader = Reader::from_path("data/tags.csv")?;
-    let mut tag_reader = AsyncDeserializer::from_reader(
-            File::open("data/tags.csv").await?
-        );
-    let mut deserialized_tags = tag_reader.deserialize::<Tag>();
-    while let Some(tag) = deserialized_tags.next().await {
-        if let Ok(tag) = tag {
-            if let Some(jogador) = jogadores.get_mut(&tag.sofifa_id) {
-                //Has tag?
-                if !jogador.tags.contains(&tag.tag) {
-                    jogador.tags.push(tag.tag.clone());
-                }
+    let mut tag_reader = Reader::from_path("data/tags.csv")?;
+   
+    tag_reader.deserialize().try_for_each(|record| -> Result<(), anyhow::Error> {
+        let tag : Tag = record?;
+        if let Some(jogador) = jogadores.get_mut(&tag.sofifa_id) {
+            //Has tag?
+            if !jogador.tags.contains(&tag.tag) {
                 jogador.tags.push(tag.tag.clone());
             }
-            if let Some(jogadores) = tags.get_mut(&tag.tag) {
-                if !jogadores.contains(&tag.sofifa_id) {
-                    jogadores.push(tag.sofifa_id);
-                }
-            } else {
-                tags.insert(&tag.tag, vec![tag.sofifa_id]).unwrap();
-            }
+            jogador.tags.push(tag.tag.clone());
         }
-    }
+        if let Some(jogadores) = tags.get_mut(&tag.tag) {
+            if !jogadores.contains(&tag.sofifa_id) {
+                jogadores.push(tag.sofifa_id);
+            }
+        } else {
+            tags.insert(&tag.tag, vec![tag.sofifa_id]).unwrap();
+        }
+        Ok(())
+    })?;
+    
     Ok(())
 }
 
 #[allow(dead_code)]
 pub async fn read_rating(users: &mut HashTable<u32, User>, jogadores: &mut HashTable<u32, JogadorComRating>) -> Result<(), anyhow::Error> {
     // let mut count = 0;
-    // let mut reader = Reader::from_path("data/rating.csv")?;
-    let mut reader = AsyncDeserializer::from_reader(
-            File::open("data/rating.csv").await?
-        );
-    let deserialized_ratings: Result<Vec<Rating>, _> = reader.deserialize::<Rating>()
-        .collect()
-        .await;
-    if let Ok(ratings) = deserialized_ratings {
+    let mut reader = Reader::from_path("data/rating.csv")?;
+    
 
-        ratings.into_iter().try_for_each(|rating| -> Result<(), anyhow::Error> {
-            let record: Rating = rating;
-            let id = record.sofifa_id;
-            let score = record.rating;
-            if let Some(user) = users.get_mut(&record.user_id ) {
-                user.ratings.push(record);
-            } else {
-                users.insert(&record.user_id, User {
-                    ratings: vec![record.clone()]
-                })?;
-            }
-            if let Some(jogador) = jogadores.get_mut(&id) {
-                jogador.rating = ((jogador.rating * jogador.rating_count as f32) + score) / (jogador.rating_count as f32 + 1.0);
-                jogador.rating_count += 1;
-            } else {
-                Err(anyhow!("Jogador não encontrado"))?;
-            }
+    reader.deserialize().into_iter().try_for_each(|rating| -> Result<(), anyhow::Error> {
+        let record: Rating = rating?;
+        let id = record.sofifa_id;
+        let score = record.rating;
+        if let Some(user) = users.get_mut(&record.user_id ) {
+            user.ratings.push(record);
+        } else {
+            users.insert(&record.user_id, User {
+                ratings: vec![record.clone()]
+            })?;
+        }
+        if let Some(jogador) = jogadores.get_mut(&id) {
+            jogador.rating = ((jogador.rating * jogador.rating_count as f32) + score) / (jogador.rating_count as f32 + 1.0);
+            jogador.rating_count += 1;
+        } else {
+            Err(anyhow!("Jogador não encontrado"))?;
+        }
 
-            Ok(())
-        })?;
-    }
+        Ok(())
+    })?;
     Ok(())
 }
 
 #[allow(dead_code)]
 pub async fn read_jogadores(jogadores: &mut HashTable<u32, JogadorComRating>) -> Result<(), anyhow::Error> {
-    // let mut reader = Reader::from_path("data/players.csv")?;
-    let mut reader = AsyncDeserializer::from_reader(
-            File::open("data/players.csv").await?
-        );
-    let deserialized_jogadores: Result<Vec<Jogador>, _> = reader.deserialize::<Jogador>().collect().await;
-
-    deserialized_jogadores.unwrap().into_iter().try_for_each(|j| -> Result<(), anyhow::Error> {
-        let record: Jogador = j;
+    let mut reader = Reader::from_path("data/players.csv")?;
+    reader.deserialize().try_for_each(|record| -> Result<(), anyhow::Error> {
+        let record: Jogador = record?;
         jogadores.insert(&record.sofifa_id, JogadorComRating {
             name: record.name,
             player_positions: record.player_positions,
