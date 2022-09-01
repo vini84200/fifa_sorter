@@ -171,10 +171,10 @@ fn draw_logs<'a>() -> TuiLoggerWidget<'a> {
 }
 
 fn draw_body(state: &AppState) -> Table {
-    if let Some((jogadores, _, t)) = state.get_tables() {
+    if let Some((jogadores, tst, _, t)) = state.get_tables() {
         let mut rows = vec![];
-        for j in t.get(&"Grêmio".to_string()).unwrap_or(vec![]) {
-            if let Some(jogador) = jogadores.get(&j) {
+        for (j,id) in tst.find_from_prefix("Jon".to_string()) {
+            if let Some(jogador) = jogadores.get(&id) {
                 let row = Row::new(vec![
                     Cell::from(jogador.name.to_string()),
                     Cell::from(jogador.player_positions.to_string()),
@@ -193,7 +193,7 @@ fn draw_body(state: &AppState) -> Table {
             )
             .widths(&[Constraint::Min(30), Constraint::Min(20), Constraint::Min(10)])
     } else {
-        warn!("No tables");
+        // warn!("No tables");
         Table::new(vec![])
             .style(Style::default().bg(Color::Red))
     }

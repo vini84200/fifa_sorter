@@ -1,6 +1,6 @@
 use csv::Reader;
 use anyhow::{Result, anyhow};
-use crate::structures::hash_table::HashTable;
+use crate::structures::{hash_table::HashTable, tst::Tst};
 use serde::Deserialize;
 
 #[derive(Debug, Clone, Default, Deserialize)]
@@ -93,17 +93,18 @@ pub async fn read_rating(users: &mut HashTable<u32, User>, jogadores: &mut HashT
 }
 
 #[allow(dead_code)]
-pub async fn read_jogadores(jogadores: &mut HashTable<u32, JogadorComRating>) -> Result<(), anyhow::Error> {
+pub async fn read_jogadores(jogadores: &mut HashTable<u32, JogadorComRating>,j_tst: &mut Tst<u32>) -> Result<(), anyhow::Error> {
     let mut reader = Reader::from_path("data/players.csv")?;
     reader.deserialize().try_for_each(|record| -> Result<(), anyhow::Error> {
         let record: Jogador = record?;
         jogadores.insert(&record.sofifa_id, JogadorComRating {
-            name: record.name,
+            name: record.name.clone(),
             player_positions: record.player_positions,
             rating: 0.0,
             rating_count: 0,
             tags: Vec::new(),
         })?;
+        j_tst.insert(&record.name, record.sofifa_id)?;
         Ok(())
     })?;
     Ok(())

@@ -3,14 +3,19 @@ use anyhow::Result;
 use core::fmt::Debug;
 
 
-#[derive(Default, Debug)]
-pub struct TstNode<T> where T: Default + Debug {
+#[derive(Debug, Clone)]
+struct TstNode<T> where T: Default + Debug {
     esq: Option<Box<TstNode<T>>>,
     dir: Option<Box<TstNode<T>>>,
     next: Option<Box<TstNode<T>>>,
     content: Option<T>,
     c: char,
 
+}
+
+#[derive(Debug, Default, Clone)]
+pub struct Tst<T> where T: Default + Debug + Clone{
+    root: TstNode<T>
 }
 
 impl<T> TstNode<T> where T: Default + Debug + Clone {
@@ -21,7 +26,6 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
 
     fn _insert(&mut self, word: &String, content: T, scanned: usize) -> Result<()> {
         let last = scanned == word.len() - 1;
-        println!("Scanned: {}", scanned);
 
         if let Some(c) = word.chars().nth(scanned as usize) {
             if self.c == c {
@@ -32,7 +36,9 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
                         next._insert(word, content, scanned + 1)?;
                     } else {
                         let mut next = TstNode::default();
-                        next.c = word.chars().nth(scanned + 1).unwrap();
+                        if let Some(c) = word.chars().nth(scanned as usize + 1) {
+                            next.c = c;
+                        }
                         self.next = Some(Box::new(next));
                         self.next.as_mut().unwrap()._insert(word, content, scanned + 1)?;
                     }
@@ -192,6 +198,46 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
     
 }
 
+impl<T> Default for TstNode<T> where T: Clone + Debug + Default {
+    fn default() -> Self {
+        Self {
+            c: ' ',
+            content: None,
+            next: None,
+            esq: None,
+            dir: None,
+        }
+    }
+}
+
+impl<T> Tst<T> where T: Clone + Default + Debug {
+    pub fn new() -> Self {
+        Self {
+            root: TstNode::<T>::default()
+        }
+    }
+
+    pub fn insert(&mut self, word: &String, content: T) -> Result<()> {
+        self.root.insert(word, content)
+    }
+
+    pub fn get(&self, word: String) -> Option<T> {
+        self.root.get(word)
+    }
+
+    pub fn find_from_prefix(&self, prefix: String) -> Vec<(String, T)> {
+        self.root.find_from_prefix(prefix)
+    }
+
+    pub fn get_words(&self) -> Vec<(String, T)> {
+        self.root.get_words()
+    }
+
+    pub fn print_vertical(&self) {
+        self.root._print_vertical(0);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -252,6 +298,37 @@ mod tests {
         // assert_eq!(tst.get_words("".to_string()), vec![("bola".to_string(), 1), ("bolo".to_string(), 5), ("hora".to_string(), 2), ("bala".to_string(), 4)]);
         // Asserts with contains
         assert!(tst.get_words().contains(&("bola".to_string(), 1)));
+        assert!(tst.get_words().contains(&("bolo".to_string(), 5)));
+        assert!(tst.get_words().contains(&("hora".to_string(), 2)));
+        assert!(tst.get_words().contains(&("bala".to_string(), 4)));
+    }
+
+    #[test]
+    fn tst_struct() {
+        let mut tst = Tst::<i32>::new();
+        tst.insert(&String::from("bola"), 1).unwrap();
+        tst.insert(&String::from("bolo"), 5).unwrap();
+        tst.insert(&String::from("hora"), 2).unwrap();
+        tst.insert(&String::from("bala"), 4).unwrap();
+
+        assert_eq!(tst.get(String::from("bola")), Some(1));
+        assert_eq!(tst.get(String::from("hora")), Some(2));
+        assert_eq!(tst.get(String::from("bala")), Some(4));
+        assert_eq!(tst.get(String::from("bolo")), Some(5));
+        assert_eq!(tst.get(String::from("bolo")), Some(5));
+        assert_eq!(tst.get(String::from("b")), None);
+
+        tst.insert(&String::from("bolo"), 5).unwrap();
+        tst.insert(&String::from("bola"), 2).unwrap();
+
+        assert_eq!(tst.get(String::from("bola")), Some(2));
+        assert_eq!(tst.get(String::from("bolo")), Some(5));
+
+        assert_eq!(tst.find_from_prefix(String::from("bo")), vec![("bola".to_string(), 2), ("bolo".to_string(), 5)]);
+        assert_eq!(tst.find_from_prefix(String::from("b")), vec![("bola".to_string(), 2), ("bolo".to_string(), 5), ("bala".to_string(), 4)]);
+        assert_eq!(tst.find_from_prefix(String::from("h")), vec![("hora".to_string(), 2)]);
+
+        assert!(tst.get_words().contains(&("bola".to_string(), 2)));
         assert!(tst.get_words().contains(&("bolo".to_string(), 5)));
         assert!(tst.get_words().contains(&("hora".to_string(), 2)));
         assert!(tst.get_words().contains(&("bala".to_string(), 4)));

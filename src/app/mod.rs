@@ -2,6 +2,7 @@ use log::{debug, warn, error, info};
 
 use crate::{inputs::key::Key, io::IoEvent};
 use crate::structures::hash_table::HashTable;
+use crate::structures::tst::Tst;
 use crate::reading;
 use std::time::Duration;
 
@@ -83,9 +84,9 @@ impl App {
         self.is_loading
     }
 
-    pub fn initialized(&mut self, jogadores: HashTable<u32, reading::JogadorComRating>, users: HashTable<u32, reading::User>, tags: HashTable<String, Vec<u32>>, timer: Duration) {
+    pub fn initialized(&mut self, jogadores: HashTable<u32, reading::JogadorComRating>,jogadores_tst: Tst<u32> , users: HashTable<u32, reading::User>, tags: HashTable<String, Vec<u32>>, timer: Duration) {
         // Update contextual actions
-        self.state = AppState::initialized(jogadores, users, tags, timer);
+        self.state = AppState::initialized(jogadores, jogadores_tst, users, tags, timer);
     }
 
     pub fn loaded(&mut self) {

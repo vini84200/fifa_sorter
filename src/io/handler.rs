@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use crate::structures::hash_table::HashTable;
+use crate::structures::tst::Tst;
 
 use log::{error, info};
 
@@ -48,15 +49,18 @@ impl IoAsyncHandler {
         let mut users : HashTable<u32, reading::User> = HashTable::new(200001);
         let mut tags : HashTable<String, Vec<u32>> = HashTable::new(438001);
 
-        reading::read_jogadores(&mut jogadores).await?;
+        let mut jogadores_tst: Tst<u32> = Tst::new();
+
+        reading::read_jogadores(&mut jogadores, &mut jogadores_tst).await?;
         reading::read_rating(&mut users, &mut jogadores).await?;
         reading::read_tags(&mut jogadores, &mut tags).await?;
+
 
         {
             let mut app = self.app.lock().await;
             app.set_loading_message("Initializing...".to_string());
             let timer = start.elapsed();
-            app.initialized(jogadores, users, tags, timer);
+            app.initialized(jogadores, jogadores_tst ,users, tags, timer);
             info!("👍 Application initialized in {:?}", timer);
         }
 

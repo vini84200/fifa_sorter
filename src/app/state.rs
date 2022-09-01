@@ -4,6 +4,7 @@ use log::info;
 use tui_textarea::TextArea;
 
 use crate::structures::hash_table::HashTable;
+use crate::structures::tst::Tst;
 use crate::inputs::key::Key;
 use crate::reading;
 
@@ -32,15 +33,17 @@ pub enum AppState{
         jogadores: HashTable<u32, reading::JogadorComRating>,
         users: HashTable<u32, reading::User>,
         tags: HashTable<String, Vec<u32>>,
+        jogadores_tst: Tst<u32>,
         duration: Duration,
         page: AppPage<'static>,
     },
 }
 
 impl AppState {
-    pub fn initialized(jogadores: HashTable<u32, reading::JogadorComRating>, users: HashTable<u32, reading::User>, tags: HashTable<String, Vec<u32>>, timer: Duration) -> Self {
+    pub fn initialized(jogadores: HashTable<u32, reading::JogadorComRating>, jogadores_tst: Tst<u32> , users: HashTable<u32, reading::User>, tags: HashTable<String, Vec<u32>>, timer: Duration) -> Self {
         Self::Initialized {
             jogadores,
+            jogadores_tst,
             users,
             tags,
             duration: timer,
@@ -59,15 +62,16 @@ impl AppState {
         }
     }
 
-    pub fn get_tables(&self) -> Option<(&HashTable<u32, reading::JogadorComRating>, &HashTable<u32, reading::User>, &HashTable<String, Vec<u32>>)> {
+    pub fn get_tables(&self) -> Option<(&HashTable<u32, reading::JogadorComRating>, &Tst<u32>,  &HashTable<u32, reading::User>, &HashTable<String, Vec<u32>>)> {
         match self {
             Self::Initialized
                 {
                     jogadores,
                     users,
                     tags,
+                    jogadores_tst,
                     ..
-                } => Some((jogadores, users, tags)),
+                } => Some((jogadores, jogadores_tst, users, tags)),
             _ => None,
         }
     }
