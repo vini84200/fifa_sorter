@@ -3,6 +3,7 @@ use tracing;
 
 use knowledge::DB;
 use reading::{read_jogadores, read_rating, read_tags};
+use crate::parser::Query;
 
 pub mod structures;
 mod models;
@@ -14,13 +15,13 @@ mod parser;
 async fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
     let mut db = DB::new();
-    // initialize(&mut db).await?;
-    // let jogadores = db.search_jogador("Jo".to_string());
-    // print!("{:?}", jogadores);
+    initialize(&mut db).await?;
 
-    let query = "top10 'ST'";
-    let query = parser::parse_query(query);
+    let query = "player jon".to_string();
+    let query = Query::try_from(query);
     println!("{:?}", query);
+    let res = db.run_query(query?);
+    println!("{:?}", res);
     Ok(())
 }
 

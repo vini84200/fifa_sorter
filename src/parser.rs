@@ -8,7 +8,7 @@ pub enum Query {
     Tags(Vec<String>),
 }
 
-pub fn parse_query(query: &str) -> Result<Query> {
+fn parse_query(query: &str) -> Result<Query> {
     let mut query = query.split_whitespace();
     match query.next() {
         Some("player") => {
@@ -55,6 +55,22 @@ pub fn parse_query(query: &str) -> Result<Query> {
             }
         }
         None => Err(anyhow::anyhow!("Invalid query"))
+    }
+}
+
+impl TryFrom<String> for Query {
+    type Error = anyhow::Error;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        parse_query(&value)
+    }
+}
+
+impl TryFrom<&str> for Query {
+    type Error = anyhow::Error;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        parse_query(value)
     }
 }
 
