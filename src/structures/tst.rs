@@ -1,7 +1,7 @@
-// Ternary Search tree
-use anyhow::Result;
 use core::fmt::Debug;
 
+// Ternary Search tree
+use anyhow::Result;
 
 #[derive(Debug, Clone)]
 struct TstNode<T> where T: Default + Debug {
@@ -14,8 +14,8 @@ struct TstNode<T> where T: Default + Debug {
 }
 
 #[derive(Debug, Default, Clone)]
-pub struct Tst<T> where T: Default + Debug + Clone{
-    root: TstNode<T>
+pub struct Tst<T> where T: Default + Debug + Clone {
+    root: TstNode<T>,
 }
 
 impl<T> TstNode<T> where T: Default + Debug + Clone {
@@ -45,26 +45,26 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
                     }
                 }
             } else if c < self.c {
-                if let Some(a) =  &mut self.esq {
+                if let Some(a) = &mut self.esq {
                     a._insert(word, content, scanned)?;
                 } else {
                     self.esq = Some(Box::new(TstNode::<T> {
                         c,
                         content: if last { Some(content.clone()) } else { None },
-                        .. Default::default()
+                        ..Default::default()
                     }));
                     if !last {
-                        self.esq.as_mut().unwrap()._insert(word, content, scanned )?;
+                        self.esq.as_mut().unwrap()._insert(word, content, scanned)?;
                     }
                 }
             } else {
-                if let Some(a) =  &mut self.dir {
+                if let Some(a) = &mut self.dir {
                     a._insert(word, content, scanned)?;
                 } else {
                     self.dir = Some(Box::new(TstNode::<T> {
                         c,
                         content: if last { Some(content.clone()) } else { None },
-                        .. Default::default()
+                        ..Default::default()
                     }));
                     if !last {
                         self.dir.as_mut().unwrap()._insert(word, content, scanned)?;
@@ -90,16 +90,16 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
                 } else {
                     if let Some(next) = &self.next {
                         next._get(word, scanned + 1)
-                    } else { None}
+                    } else { None }
                 }
             } else if c < self.c {
-                if let Some(a) =  &self.esq {
+                if let Some(a) = &self.esq {
                     a._get(word, scanned)
                 } else {
                     None
                 }
             } else {
-                if let Some(a) =  &self.dir {
+                if let Some(a) = &self.dir {
                     a._get(word, scanned)
                 } else {
                     None
@@ -166,13 +166,13 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
                     } else { vec![] }
                 }
             } else if c < self.c {
-                if let Some(a) =  &self.esq {
+                if let Some(a) = &self.esq {
                     a._find_from_prefix(prefix, scanned)
                 } else {
                     vec![]
                 }
             } else {
-                if let Some(a) =  &self.dir {
+                if let Some(a) = &self.dir {
                     a._find_from_prefix(prefix, scanned)
                 } else {
                     vec![]
@@ -198,7 +198,6 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
             esq._print_vertical(level + 1);
         }
     }
-    
 }
 
 impl<T> Default for TstNode<T> where T: Clone + Debug + Default {
@@ -244,6 +243,7 @@ impl<T> Tst<T> where T: Clone + Default + Debug {
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[test]
     fn insert_tst() {
         let mut tst = TstNode::<i32>::default();

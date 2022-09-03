@@ -1,5 +1,5 @@
-use serde::Deserialize;
 use anyhow::anyhow;
+use serde::Deserialize;
 
 #[derive(Debug, Clone, Default, Deserialize)]
 pub struct Jogador {
@@ -80,8 +80,6 @@ impl Jogador {
     pub fn get_name(&self) -> &String {
         &self.name
     }
-
-
 }
 
 

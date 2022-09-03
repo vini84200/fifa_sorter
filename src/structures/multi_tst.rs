@@ -1,13 +1,14 @@
 use std::fmt::Debug;
+
 use anyhow::{anyhow, Result};
+
 use super::tst::Tst;
 
-
-pub struct MultiTst<T> where T: Debug + Clone + Default{
-    tst: Tst<Vec<T>>
+pub struct MultiTst<T> where T: Debug + Clone + Default {
+    tst: Tst<Vec<T>>,
 }
 
-impl<T> MultiTst<T>  where T: Debug + Clone + Default + PartialEq{
+impl<T> MultiTst<T> where T: Debug + Clone + Default + PartialEq {
     pub fn new() -> Self {
         MultiTst {
             tst: Tst::new()

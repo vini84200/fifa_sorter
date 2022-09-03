@@ -1,25 +1,27 @@
-use crate::{structures::{hash_table::HashTable, multi_tst::MultiTst}, models::{Jogador, JogadorComRating, User, Rating, Tag}};
-use anyhow::{anyhow};
+use anyhow::anyhow;
+
+use crate::{models::{Jogador, JogadorComRating, Rating, Tag, User}, structures::{hash_table::HashTable, multi_tst::MultiTst}};
 
 const JOGADOR_SIZE: usize = 22807;
 const TAG_SIZE: usize = 438001;
 const USER_SIZE: usize = 200001;
+
 struct JogadoresDB {
     ht: HashTable<u32, JogadorComRating>,
     full_trie: MultiTst<u32>,
-    tag: HashTable<String, u32>
+    tag: HashTable<String, u32>,
 }
 
 impl JogadoresDB {
     fn new() -> Self {
         let ht = HashTable::new(JOGADOR_SIZE);
         let full_trie = MultiTst::new();
-        let tag =  HashTable::new(TAG_SIZE);
+        let tag = HashTable::new(TAG_SIZE);
 
         JogadoresDB {
             ht,
             full_trie,
-            tag
+            tag,
         }
     }
 

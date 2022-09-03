@@ -1,21 +1,26 @@
+use anyhow::{Ok, Result};
+use tracing;
+
+use knowledge::DB;
+use reading::{read_jogadores, read_rating, read_tags};
+
 pub mod structures;
 mod models;
 mod reading;
 mod knowledge;
-
-use reading::{read_jogadores, read_rating, read_tags};
-use knowledge::DB;
-
-use anyhow::{Result, Ok};
-use tracing;
+mod parser;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
     let mut db = DB::new();
-    initialize(&mut db).await?;
-    let jogadores = db.search_jogador("Jo".to_string());
-    print!("{:?}", jogadores);
+    // initialize(&mut db).await?;
+    // let jogadores = db.search_jogador("Jo".to_string());
+    // print!("{:?}", jogadores);
+
+    let query = "top10 'ST'";
+    let query = parser::parse_query(query);
+    println!("{:?}", query);
     Ok(())
 }
 

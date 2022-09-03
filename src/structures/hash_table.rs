@@ -42,9 +42,9 @@ impl Hashable for u32 {
 
 #[allow(dead_code)]
 impl<K, V> HashTable<K, V>
-where
-    K: Clone + Default + Hashable + PartialEq,
-    V: Clone + Default,
+    where
+        K: Clone + Default + Hashable + PartialEq,
+        V: Clone + Default,
 {
     pub fn new(size: usize) -> Self {
         HashTable {
@@ -101,11 +101,11 @@ where
     }
 }
 
-impl<U, T> Extend<(U, T)> for HashTable<U, T> 
+impl<U, T> Extend<(U, T)> for HashTable<U, T>
     where U: Clone + Default + Hashable + PartialEq,
           T: Clone + Default
-          {
-    fn extend<I: IntoIterator<Item = (U, T)>>(&mut self, iter: I) {
+{
+    fn extend<I: IntoIterator<Item=(U, T)>>(&mut self, iter: I) {
         for (k, v) in iter {
             self.insert(&k, v).unwrap();
         }

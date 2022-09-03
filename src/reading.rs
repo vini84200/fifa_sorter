@@ -1,6 +1,7 @@
-use crate::{structures::{hash_table::HashTable, tst::Tst}, knowledge::DB};
 use anyhow::{anyhow, Result};
 use csv::Reader;
+
+use crate::{knowledge::DB, structures::{hash_table::HashTable, tst::Tst}};
 use crate::models::*;
 
 #[allow(dead_code)]
@@ -30,7 +31,7 @@ pub async fn read_rating(
         let rating: Rating = result?;
         db.insert_rating(rating)?;
         count += 1;
-        if count % 100000 == 0 {
+        if count % 1000000 == 0 {
             println!("{} ratings read", count);
         }
     }
