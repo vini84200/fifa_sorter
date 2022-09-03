@@ -19,7 +19,7 @@ pub struct Tst<T> where T: Default + Debug + Clone {
 }
 
 impl<T> TstNode<T> where T: Default + Debug + Clone {
-    pub fn insert(&mut self, word: &String, content: T) -> Result<()> {
+    pub fn insert(&mut self, word: &str, content: T) -> Result<()> {
         let word = word.to_lowercase();
         self._insert(&word, content, 0)?;
         Ok(())
@@ -32,17 +32,16 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
             if self.c == c {
                 if last {
                     self.content = Some(content);
+                } else if let Some(next) = &mut self.next {
+                    next._insert(word, content, scanned + 1)?;
                 } else {
-                    if let Some(next) = &mut self.next {
-                        next._insert(word, content, scanned + 1)?;
-                    } else {
-                        let mut next = TstNode::default();
-                        if let Some(c) = word.chars().nth(scanned as usize + 1) {
-                            next.c = c;
-                        }
-                        self.next = Some(Box::new(next));
-                        self.next.as_mut().unwrap()._insert(word, content, scanned + 1)?;
+                    let mut next = TstNode::default();
+                    if let Some(c) = word.chars().nth(scanned as usize + 1) {
+                        next.c = c;
                     }
+                    self.next = Some(Box::new(next));
+                    self.next.as_mut().unwrap()._insert(word, content, scanned + 1)?;
+
                 }
             } else if c < self.c {
                 if let Some(a) = &mut self.esq {
@@ -57,18 +56,16 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
                         self.esq.as_mut().unwrap()._insert(word, content, scanned)?;
                     }
                 }
+            } else if let Some(a) = &mut self.dir {
+                a._insert(word, content, scanned)?;
             } else {
-                if let Some(a) = &mut self.dir {
-                    a._insert(word, content, scanned)?;
-                } else {
-                    self.dir = Some(Box::new(TstNode::<T> {
-                        c,
-                        content: if last { Some(content.clone()) } else { None },
-                        ..Default::default()
-                    }));
-                    if !last {
-                        self.dir.as_mut().unwrap()._insert(word, content, scanned)?;
-                    }
+                self.dir = Some(Box::new(TstNode::<T> {
+                    c,
+                    content: if last { Some(content.clone()) } else { None },
+                    ..Default::default()
+                }));
+                if !last {
+                    self.dir.as_mut().unwrap()._insert(word, content, scanned)?;
                 }
             }
         }

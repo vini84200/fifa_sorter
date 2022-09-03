@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Query {
     Player(String),
     User(u32),
@@ -14,7 +14,11 @@ fn parse_query(query: &str) -> Result<Query> {
         Some("player") => {
             // Add whitespaces between words
             let name: String = query.collect::<Vec<&str>>().join(" ");
-            Ok(Query::Player(name))
+            if name.trim().is_empty() {
+                Err(anyhow!("Invalid query"))
+            } else {
+                Ok(Query::Player(name))
+            }
         }
         Some("user") => {
             match query.next() {
@@ -28,12 +32,23 @@ fn parse_query(query: &str) -> Result<Query> {
             }
         }
         Some("tags") => {
-            let mut tags = Vec::new();
-            for tag in query {
-                let tag = tag.trim_matches('\'');
-                tags.push(tag.to_string());
+            // Format: tags 'tag1' 'tag2' 'tag3 that is long'
+            let tags_collected: String = query.collect::<Vec<&str>>().join(" ");
+            if tags_collected.trim().is_empty() {
+                Err(anyhow!("Invalid query"))
+            } else {
+                let query = tags_collected.split('\'').collect::<Vec<&str>>();
+                let mut tags = Vec::new();
+                for (i, tag) in query.iter().enumerate() {
+                    if i % 2 == 1 {
+                        tags.push(tag.to_string());
+                    } else if !tag.trim().is_empty() {
+                        anyhow::bail!("Invalid query");
+                    }
+                }
+                Ok(Query::Tags(tags))
             }
-            Ok(Query::Tags(tags))
+
         }
         Some(prompt) => {
             if prompt.starts_with("top") {
@@ -95,5 +110,59 @@ mod tests {
         let query = "top10 'ST'";
         let query = parse_query(query).unwrap();
         assert_eq!(query, Query::Top(10, "ST".to_string()));
+    }
+
+    #[test]
+    fn test_try_from() {
+        let query = "player Cristiano Ronaldo";
+        let query = Query::try_from(query).unwrap();
+        assert_eq!(query, Query::Player("Cristiano Ronaldo".to_string()));
+
+        let query = "user 123";
+        let query = Query::try_from(query).unwrap();
+        assert_eq!(query, Query::User(123));
+
+        let query = "tags 'ST' 'CF'";
+        let query = Query::try_from(query).unwrap();
+        assert_eq!(query, Query::Tags(vec!["ST".to_string(), "CF".to_string()]));
+
+        let query = "top10 'ST'";
+        let query = Query::try_from(query).unwrap();
+        assert_eq!(query, Query::Top(10, "ST".to_string()));
+    }
+
+    #[test]
+    fn test_wrong_query() {
+        let query = "player";
+        let query = parse_query(query);
+        assert!(query.is_err());
+
+        let query = "user";
+        let query = parse_query(query);
+        assert!(query.is_err());
+
+        let query = "tags";
+        let query = parse_query(query);
+        assert!(query.is_err());
+
+        let query = "tags ";
+        let query = parse_query(query);
+        assert!(query.is_err());
+
+        let query = "top";
+        let query = parse_query(query);
+        assert!(query.is_err());
+
+        let query = "top0";
+        let query = parse_query(query);
+        assert!(query.is_err());
+
+        let query = "top9";
+        let query = parse_query(query);
+        assert!(query.is_err());
+
+        let query = "top 'ST'";
+        let query = parse_query(query);
+        assert!(query.is_err());
     }
 }

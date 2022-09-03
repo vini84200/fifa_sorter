@@ -52,3 +52,17 @@ pub async fn read_jogadores(
         })?;
     Ok(())
 }
+
+
+pub async fn initialize(db: &mut DB) -> Result<()> {
+    let start = std::time::Instant::now();
+    read_jogadores(db).await?;
+    read_rating(db).await?;
+    read_tags(db).await?;
+
+    db.finish_init();
+
+    let elapsed = start.elapsed();
+    println!("Time elapsed in initialization is: {:?}", elapsed);
+    Ok(())
+}

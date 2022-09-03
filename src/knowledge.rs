@@ -1,6 +1,7 @@
 use anyhow::anyhow;
 
 use crate::{models::{Jogador, JogadorComRating, Rating, Tag, User}, Query, structures::{hash_table::HashTable, multi_tst::MultiTst}};
+use crate::structures::btree::BTree;
 
 const JOGADOR_SIZE: usize = 22807;
 const TAG_SIZE: usize = 438001;
@@ -9,8 +10,8 @@ const USER_SIZE: usize = 200001;
 struct JogadoresDB {
     ht: HashTable<u32, JogadorComRating>,
     full_trie: MultiTst<u32>,
-    tag: HashTable<String, u32>,
-    // pos: HashTable<String, ()>, TODO: Use Hash of BTrees to store positions
+    tag: HashTable<String, Vec<u32>>,
+    pos_ht: HashTable<String, BTree<f32, u32>>
 }
 
 impl JogadoresDB {
@@ -18,12 +19,13 @@ impl JogadoresDB {
         let ht = HashTable::new(JOGADOR_SIZE);
         let full_trie = MultiTst::new();
         let tag = HashTable::new(TAG_SIZE);
-        // let pos_ht = HashTable::new(101);
+        let pos_ht = HashTable::new(101);
 
         JogadoresDB {
             ht,
             full_trie,
             tag,
+            pos_ht
         }
     }
 
@@ -43,7 +45,11 @@ impl JogadoresDB {
     }
 
     fn insert_tag(&mut self, tag: Tag) -> Result<(), anyhow::Error> {
-        self.tag.insert(&tag.get_tag(), tag.get_id())?;
+        if let Some(jogadores) = self.tag.get_mut(tag.get_tag()) {
+            jogadores.push(tag.get_id());
+        } else {
+            self.tag.insert(tag.get_tag(), vec![tag.get_id()])?;
+        }
         self.ht.get_mut(&tag.get_id()).unwrap().add_tag(tag);
         Ok(())
     }
@@ -51,6 +57,28 @@ impl JogadoresDB {
     fn add_rating(&mut self, rating: Rating) -> Result<(), anyhow::Error> {
         self.ht.get_mut(&rating.get_sofifa_id()).unwrap().add_rating(rating.get_rating());
         Ok(())
+    }
+
+    fn populate_pos_ht(&mut self) {
+       self.ht.for_each(|_, jogador| {
+           let pos = jogador.get_pos().clone();
+           let rating = jogador.get_rating();
+           let id = jogador.get_sofifa_id();
+           let count = jogador.get_rating_count();
+
+           if self.pos_ht.contains_key(&pos) {
+               if count > 1000 {
+                   self.pos_ht.get_mut(&pos).unwrap().insert(rating, id);
+               }
+
+           } else {
+               let mut btree = BTree::new();
+               if count > 1000 {
+                   btree.insert(rating, id);
+               }
+               self.pos_ht.insert(&pos, btree).unwrap();
+           }
+       });
     }
 }
 
@@ -148,6 +176,10 @@ impl DB {
         Ok(())
     }
 
+    pub fn finish_init(&mut self) {
+        self.jogadores.populate_pos_ht();
+    }
+
     pub fn run_query(&self, query: Query) -> Result<QueryResult, anyhow::Error> {
         match query {
             Query::Player(name) => {
@@ -165,10 +197,32 @@ impl DB {
                     Err(anyhow!("User not found"))
                 }
             },
-            // Query::Top(n, position) => {
-            //
-            // },
-            _ => Err(anyhow!("Query not implemented")),
+            Query::Top(n, position) => {
+                let jogadores = self.jogadores.pos_ht.get(&position).unwrap().get_greatest_n(n as u32).iter().map(|a| self.jogadores.get(*a).unwrap()).collect::<Vec<JogadorComRating>>();
+                Ok(QueryResult::Jogadores(jogadores))
+            },
+            Query::Tags(tags) => {
+                let mut tags_iter = tags.iter();
+                let first_tag = tags_iter.next().unwrap();
+                let mut last_jogadores = self.jogadores.tag.get(first_tag)
+                    .iter()
+                    .flatten()
+                    .map(|a| self.jogadores.get(*a).unwrap())
+                    .collect::<Vec<JogadorComRating>>();
+                for tag in tags_iter {
+                    let jogadores = self.jogadores.tag.get(tag)
+                        .iter()
+                        .flatten()
+                        .map(|a| self.jogadores.get(*a).unwrap())
+                        .filter(|a| last_jogadores.contains(a))
+                        .collect::<Vec<JogadorComRating>>();
+                    last_jogadores = jogadores;
+
+                }
+                Ok(QueryResult::Jogadores(last_jogadores))
+            },
+            // _ => Err(anyhow!("Query not implemented")),
         }
     }
 }
+

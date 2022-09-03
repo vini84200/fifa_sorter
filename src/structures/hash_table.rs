@@ -1,3 +1,4 @@
+use std::option::Iter;
 use anyhow::{anyhow, Result};
 
 #[derive(Clone, Debug)]
@@ -97,6 +98,21 @@ impl<K, V> HashTable<K, V>
             self.insert(key, Default::default())?;
             self.get_mut(key)
                 .ok_or_else(|| anyhow!("Could not get mut or default"))
+        }
+    }
+
+    pub fn contains_key(&self, key: &K) -> bool {
+        self.get(key).is_some()
+    }
+
+    pub fn for_each<F>(&self, mut f: F)
+        where
+            F: FnMut(&K, &V),
+    {
+        for i in &self.items {
+            for a in &i.item {
+                f(&a.0, &a.1);
+            }
         }
     }
 }

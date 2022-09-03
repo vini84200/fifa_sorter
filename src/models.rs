@@ -18,6 +18,14 @@ pub struct JogadorComRating {
     tags: Vec<String>,
 }
 
+impl PartialEq for JogadorComRating {
+    fn eq(&self, other: &Self) -> bool {
+        self.sofifa_id == other.sofifa_id
+    }
+}
+
+
+
 impl From<Jogador> for JogadorComRating {
     fn from(jogador: Jogador) -> Self {
         JogadorComRating {
@@ -61,6 +69,22 @@ impl JogadorComRating {
 
     pub fn get_sofifa_id(&self) -> u32 {
         self.sofifa_id
+    }
+
+    pub fn get_rating(&self) -> f32 {
+        self.rating
+    }
+
+    pub fn get_tags(&self) -> &Vec<String> {
+        &self.tags
+    }
+
+    pub fn get_pos(&self) -> &String {
+        &self.player_positions
+    }
+
+    pub fn get_rating_count(&self) -> u32 {
+        self.rating_count
     }
 }
 
