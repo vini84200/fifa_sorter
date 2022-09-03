@@ -20,7 +20,8 @@ pub struct Tst<T> where T: Default + Debug + Clone{
 
 impl<T> TstNode<T> where T: Default + Debug + Clone {
     pub fn insert(&mut self, word: &String, content: T) -> Result<()> {
-        self._insert(word, content, 0)?;
+        let word = word.to_lowercase();
+        self._insert(&word, content, 0)?;
         Ok(())
     }
 
@@ -76,6 +77,7 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
     }
 
     pub fn get(&self, word: String) -> Option<T> {
+        let word = word.to_lowercase();
         self._get(word, 0)
     }
 
@@ -109,6 +111,7 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
     }
 
     pub fn find_from_prefix(&self, prefix: String) -> Vec<(String, T)> {
+        let prefix = prefix.to_lowercase();
         self._find_from_prefix(prefix, 0)
     }
 
@@ -332,5 +335,20 @@ mod tests {
         assert!(tst.get_words().contains(&("bolo".to_string(), 5)));
         assert!(tst.get_words().contains(&("hora".to_string(), 2)));
         assert!(tst.get_words().contains(&("bala".to_string(), 4)));
+    }
+
+    #[test]
+    fn test_case_nonsesitive() {
+        let mut tst = Tst::<i32>::new();
+        tst.insert(&String::from("bola"), 1).unwrap();
+        tst.insert(&String::from("bOlo"), 5).unwrap();
+        tst.insert(&String::from("hora"), 2).unwrap();
+
+        assert_eq!(tst.get(String::from("Bola")), Some(1));
+        assert_eq!(tst.get(String::from("HoRa")), Some(2));
+        assert_eq!(tst.get(String::from("bala")), None);
+        assert_eq!(tst.get(String::from("BOLO")), Some(5));
+
+        assert_eq!(tst.find_from_prefix(String::from("BO")), vec![("bola".to_string(), 1), ("bolo".to_string(), 5)]);
     }
 }

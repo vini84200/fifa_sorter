@@ -1,35 +1,31 @@
 pub mod structures;
+mod models;
 mod reading;
+mod knowledge;
 
+use reading::{read_jogadores, read_rating, read_tags};
+use knowledge::DB;
 
-use fifa_sorter::app::App;
-use anyhow::Result;
-use fifa_sorter::start_ui;
-use fifa_sorter::io::handler::IoAsyncHandler;
-use fifa_sorter::io::IoEvent;
-use log::LevelFilter;
-use std::{sync::Arc};
+use anyhow::{Result, Ok};
+use tracing;
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    tracing_subscriber::fmt::init();
+    let mut db = DB::new();
+    initialize(&mut db).await?;
+    let jogadores = db.search_jogador("Jo".to_string());
+    print!("{:?}", jogadores);
+    Ok(())
+}
 
-    let (sync_io_tx, mut sync_io_rx) = tokio::sync::mpsc::channel::<IoEvent>(100);
+async fn initialize(db: &mut DB) -> Result<()> {
+    let start = std::time::Instant::now();
+    read_jogadores(db).await?;
+    read_rating(db).await?;
+    read_tags(db).await?;
 
-    let app = Arc::new(tokio::sync::Mutex::new(App::new(sync_io_tx.clone())));
-    let app_ui = Arc::clone(&app);
-
-    // Configue log
-    tui_logger::init_logger(LevelFilter::Debug).unwrap();
-    tui_logger::set_default_level(log::LevelFilter::Debug);
-
-    tokio::spawn(async move {
-        let mut handler = IoAsyncHandler::new(app);
-        while let Some(io_event) = sync_io_rx.recv().await {
-            handler.handle_io_event(io_event).await;
-        }
-    });
-
-    start_ui(&app_ui).await?;
-
+    let elapsed = start.elapsed();
+    println!("Time elapsed in initialization is: {:?}", elapsed);
     Ok(())
 }

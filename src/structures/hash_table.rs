@@ -101,6 +101,17 @@ where
     }
 }
 
+impl<U, T> Extend<(U, T)> for HashTable<U, T> 
+    where U: Clone + Default + Hashable + PartialEq,
+          T: Clone + Default
+          {
+    fn extend<I: IntoIterator<Item = (U, T)>>(&mut self, iter: I) {
+        for (k, v) in iter {
+            self.insert(&k, v).unwrap();
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
