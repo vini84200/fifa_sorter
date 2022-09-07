@@ -74,7 +74,7 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
     }
 
     pub fn get(&self, word: String) -> Option<T> {
-        let word = word.to_lowercase();
+        let word = Self::pre_process(word);
         self._get(word, 0)
     }
 
@@ -108,7 +108,7 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
     }
 
     pub fn find_from_prefix(&self, prefix: String) -> Vec<(String, T)> {
-        let prefix = prefix.to_lowercase();
+        let prefix = Self::pre_process(prefix);
         self._find_from_prefix(prefix, 0)
     }
 
@@ -194,6 +194,14 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
         if let Some(esq) = &self.esq {
             esq._print_vertical(level + 1);
         }
+    }
+
+    fn pre_process(word: String) -> String {
+        let word = word
+            .to_lowercase()
+            .trim()
+            .to_string();
+        word
     }
 }
 

@@ -30,6 +30,7 @@ impl JogadoresDB {
     }
 
     fn insert(&mut self, jogador: Jogador) -> Result<(), anyhow::Error> {
+        // println!("Inserting jogador {} - {}", jogador.get_id(), jogador.get_name());
         self.ht.insert(&jogador.get_id(), JogadorComRating::from(jogador.clone()))?;
         self.full_trie.insert(jogador.get_name().clone(), jogador.get_id())?;
 
@@ -79,6 +80,10 @@ impl JogadoresDB {
                self.pos_ht.insert(&pos, btree).unwrap();
            }
        });
+    }
+
+    pub fn debug_trie(&self) {
+        self.full_trie.debug();
     }
 }
 
@@ -223,6 +228,10 @@ impl DB {
             },
             // _ => Err(anyhow!("Query not implemented")),
         }
+    }
+
+    pub fn debug_trie(&self) {
+        self.jogadores.debug_trie();
     }
 }
 

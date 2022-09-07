@@ -32,7 +32,7 @@ pub async fn read_rating(
         db.insert_rating(rating)?;
         count += 1;
         if count % 1000000 == 0 {
-            println!("{} ratings read", count);
+            // println!("{} ratings read", count);
         }
     }
     Ok(())

@@ -22,7 +22,11 @@ log = "0.4"
 csv = "1.1"
 tracing = "0.1"
 tracing-log = "0.1"
+chumsky = "0.8.0"
 #TODO: iced = "0.4"
 tracing-subscriber = "0.3"
+reedline = { version = "0.11.0", optional = true}
 
-coz = "0.1"
+[features]
+default = ["terminal"]
+terminal = ["reedline"]

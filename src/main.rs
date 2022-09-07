@@ -9,11 +9,18 @@ mod models;
 mod reading;
 mod knowledge;
 mod parser;
-mod simple_uses;
+
+#[cfg(feature = "terminal")]
+mod terminal;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
-    simple_uses::main_loop().await;
+
+    #[cfg(feature = "terminal")]
+    terminal::main_loop().await;
+
+    // Run if feature gui
+    // TODO: Implement GUI
     Ok(())
 }
