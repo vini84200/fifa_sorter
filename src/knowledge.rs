@@ -62,23 +62,24 @@ impl JogadoresDB {
 
     fn populate_pos_ht(&mut self) {
        self.ht.for_each(|_, jogador| {
-           let pos = jogador.get_pos().clone();
+           let positions = jogador.get_pos().player_positions.clone();
            let rating = jogador.get_rating();
            let id = jogador.get_sofifa_id();
            let count = jogador.get_rating_count();
+            for pos in positions {
+                if self.pos_ht.contains_key(&pos) {
+                    if count > 1000 {
+                        self.pos_ht.get_mut(&pos).unwrap().insert(rating, id);
+                    }
 
-           if self.pos_ht.contains_key(&pos) {
-               if count > 1000 {
-                   self.pos_ht.get_mut(&pos).unwrap().insert(rating, id);
-               }
-
-           } else {
-               let mut btree = BTree::new();
-               if count > 1000 {
-                   btree.insert(rating, id);
-               }
-               self.pos_ht.insert(&pos, btree).unwrap();
-           }
+                } else {
+                    let mut btree = BTree::new();
+                    if count > 1000 {
+                        btree.insert(rating, id);
+                    }
+                    self.pos_ht.insert(&pos, btree).unwrap();
+                }
+            }
        });
     }
 
@@ -224,7 +225,19 @@ impl DB {
                     last_jogadores = jogadores;
 
                 }
-                Ok(QueryResult::Jogadores(last_jogadores))
+                // Remover duplicados
+                if last_jogadores.len() > 1 {
+                    let mut jogadores = vec![last_jogadores[0].clone()];
+                    for j in last_jogadores {
+                        if !jogadores.contains(&j) {
+                            jogadores.push(j);
+                        }
+                    }
+                    Ok(QueryResult::Jogadores(jogadores))
+                }
+                else {
+                    Ok(QueryResult::Jogadores(vec![]))
+                }
             },
             // _ => Err(anyhow!("Query not implemented")),
         }
