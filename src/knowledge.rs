@@ -46,10 +46,10 @@ impl JogadoresDB {
     }
 
     fn insert_tag(&mut self, tag: Tag) -> Result<(), anyhow::Error> {
-        if let Some(jogadores) = self.tag.get_mut(tag.get_tag()) {
+        if let Some(jogadores) = self.tag.get_mut(&tag.get_tag().to_lowercase()) {
             jogadores.push(tag.get_id());
         } else {
-            self.tag.insert(tag.get_tag(), vec![tag.get_id()])?;
+            self.tag.insert(&tag.get_tag().to_lowercase(), vec![tag.get_id()])?;
         }
         self.ht.get_mut(&tag.get_id()).unwrap().add_tag(tag);
         Ok(())
@@ -209,14 +209,14 @@ impl DB {
             },
             Query::Tags(tags) => {
                 let mut tags_iter = tags.iter();
-                let first_tag = tags_iter.next().unwrap();
-                let mut last_jogadores = self.jogadores.tag.get(first_tag)
+                let first_tag: &String = tags_iter.next().unwrap();
+                let mut last_jogadores = self.jogadores.tag.get(&first_tag.to_lowercase())
                     .iter()
                     .flatten()
                     .map(|a| self.jogadores.get(*a).unwrap())
                     .collect::<Vec<JogadorComRating>>();
                 for tag in tags_iter {
-                    let jogadores = self.jogadores.tag.get(tag)
+                    let jogadores = self.jogadores.tag.get(&tag.to_lowercase())
                         .iter()
                         .flatten()
                         .map(|a| self.jogadores.get(*a).unwrap())

@@ -1,12 +1,14 @@
 use std::borrow::Cow;
 use std::io;
+
+use reedline::{DefaultPrompt, Prompt, PromptEditMode, PromptHistorySearch, Reedline, Signal};
+use tabled::{Modify, Style, Table, Tabled, Width};
+use tabled::object::Segment;
+
 use crate::{DB, Query};
 use crate::knowledge::QueryResult;
-use crate::reading::initialize;
-use reedline::{DefaultPrompt, Prompt, PromptEditMode, PromptHistorySearch, Reedline, Signal};
-use tabled::{Modify, Style, Table, Width, Tabled};
-use tabled::object::Segment;
 use crate::models::{JogadorComRating, Rating, User};
+use crate::reading::initialize;
 
 pub async fn main_loop() {
     println!("Inicializando...");
@@ -24,7 +26,7 @@ pub async fn main_loop() {
                Ok(Signal::Success(buffer)) => {
                    if buffer.trim().is_empty() { continue; }
 
-                   if buffer.trim() == "exit" || buffer.trim() == "quit" {
+                   if buffer.trim() == "exit" || buffer.trim() == "quit" || buffer.trim() == "q" {
                        break;
                    }
                    let query = Query::try_from(buffer);
@@ -33,24 +35,24 @@ pub async fn main_loop() {
                            let start = std::time::Instant::now();
                            let res = db.run_query(query);
                            let elapsed = start.elapsed();
+                           println!("Query executada em {:?}", elapsed);
                            match res {
                                Ok(res) => print_res(res, &db),
-                               Err(e) => println!("Error in query execution: {:?}", e),
+                               Err(e) => println!("Erro na execução da query: {}", e)
                            }
-                           println!("Elapsed: {:?}", elapsed);
                        }
                        Err(e) => {
-                           println!("Error in parsing: {}", e);
+                           println!("Erro na leitura da query: {}", e);
                            continue;
                        }
                    }
                },
                Ok(Signal::CtrlC) => {
-                   println!("Ctrl-C");
+                   println!("Ctrl-C lido. Encerrando...");
                    break;
                },
                x => {
-                   println!("Error: {:?}", x);
+                   println!("Erro: {:?}", x);
                    break;
                }
             // println!("{:?}", query);
@@ -87,41 +89,47 @@ fn show_jogadores(jogadores: &Vec<JogadorComRating>) {
             .with(Modify::new(Segment::all()).with(Width::wrap(19)));
 
         println!("{}", table);
-        println!("Page {}/{}", page, (jogadores.len() as f32 / 20.0).ceil() as u32);
-        println!("Press enter to go to next page, or type a number to go to that page. Type 'q' to quit.");
-        let mut line_editor = Reedline::create();
-        let prompt = PagerPrompt::new(page,
-                                      (jogadores.len() as f32 / 20.0).ceil() as usize);
-        let line = line_editor.read_line(&prompt);
-        if line.is_err() { break; }
-        let line = line.unwrap();
-        match line {
-            Signal::Success(a) => {
-                if a.trim().is_empty() && page < (jogadores.len() as f32 / 20.0).ceil() as usize {
-                    page += 1;
-                } else if a.trim() == "q"
-                {
+        let max_pages = (jogadores.len() as f32 / 20.0).ceil() as u32;
+        if max_pages > 1 {
+            println!("Página {}/{}", page, max_pages);
+            println!("Pressione 'q' para sair, pressione Enter para a próxima página, 'p' para a página anterior ou digite um número para ir para uma página específica");
+
+
+            let mut line_editor = Reedline::create();
+            let prompt = PagerPrompt::new(page, max_pages as usize);
+            let line = line_editor.read_line(&prompt);
+            if line.is_err() { break; }
+            let line = line.unwrap();
+            match line {
+                Signal::Success(a) => {
+                    if a.trim().is_empty() && page < max_pages as usize {
+                        page += 1;
+                    } else if a.trim() == "q"
+                    {
+                        break;
+                    } else if a.trim() == "p" {
+                        if page > 1 {
+                            page -= 1;
+                        }
+                    } else {
+                        let page_num = a.trim().parse::<usize>();
+                        if page_num.is_err() {
+                            println!("Número inválido");
+                            continue;
+                        }
+                        let page_num = page_num.unwrap();
+                        if page_num > 0 && page_num <= max_pages as usize {
+                            page = page_num;
+                        }
+                    }
+                },
+                _ => {
+                    println!("Você saiu do pager");
                     break;
-                } else if a.trim() == "p" {
-                    if page > 1 {
-                        page -= 1;
-                    }
-                } else {
-                    let page_num = a.trim().parse::<usize>();
-                    if page_num.is_err() {
-                        println!("Invalid page number");
-                        continue;
-                    }
-                    let page_num = page_num.unwrap();
-                    if page_num > 0 && page_num <= (jogadores.len() as f32 / 20.0).ceil() as usize {
-                        page = page_num;
-                    }
                 }
-            },
-            _ => {
-                println!("Going back to main menu");
-                break;
             }
+        } else {
+            break;
         }
     }
 }
@@ -204,23 +212,23 @@ struct CleanPrompt;
 
 impl Prompt for CleanPrompt {
     fn render_prompt_left(&self) -> Cow<str> {
-        return ">> ".into();
+        ">> ".into()
     }
 
     fn render_prompt_right(&self) -> Cow<str> {
-        return "".into();
+        "".into()
     }
 
     fn render_prompt_indicator(&self, prompt_mode: PromptEditMode) -> Cow<str> {
-        return " ".into();
+        " ".into()
     }
 
     fn render_prompt_multiline_indicator(&self) -> Cow<str> {
-        return ":MLT ".into();
+        "| ".into()
     }
 
     fn render_prompt_history_search_indicator(&self, history_search: PromptHistorySearch) -> Cow<str> {
-        return "HIUS".into();
+        "? ".into()
     }
 }
 
@@ -232,23 +240,23 @@ struct PagerPrompt {
 
 impl Prompt for PagerPrompt {
     fn render_prompt_left(&self) -> Cow<str> {
-        return ": ".into();
+        ": ".into()
     }
 
     fn render_prompt_right(&self) -> Cow<str> {
-        return format!("Page {}/{}", self.page, self.max_page).into();
+        format!("Página {}/{}", self.page, self.max_page).into()
     }
 
     fn render_prompt_indicator(&self, prompt_mode: PromptEditMode) -> Cow<str> {
-        return " ".into();
+        " ".into()
     }
 
     fn render_prompt_multiline_indicator(&self) -> Cow<str> {
-        return ":MLT ".into();
+        "| ".into()
     }
 
     fn render_prompt_history_search_indicator(&self, history_search: PromptHistorySearch) -> Cow<str> {
-        return "HIUS".into();
+        "?".into()
     }
 }
 

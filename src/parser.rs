@@ -15,7 +15,7 @@ fn parse_query(query: &str) -> Result<Query> {
             // Add whitespaces between words
             let name: String = query.collect::<Vec<&str>>().join(" ");
             if name.trim().is_empty() {
-                Err(anyhow!("Invalid query"))
+                Err(anyhow!("Nome do jogador não pode ser vazio"))
             } else {
                 Ok(Query::Player(name))
             }
@@ -25,17 +25,17 @@ fn parse_query(query: &str) -> Result<Query> {
                 Some(user) => {
                     match user.parse::<u32>() {
                         Ok(user) => Ok(Query::User(user)),
-                        Err(_) => anyhow::bail!("Invalid query")
+                        Err(_) => anyhow::bail!("ID de usuário inválido"),
                     }
                 }
-                None => anyhow::bail!("Invalid query")
+                None => anyhow::bail!("ID de usuário não pode ser vazio"),
             }
         }
         Some("tags") => {
             // Format: tags 'tag1' 'tag2' 'tag3 that is long'
             let tags_collected: String = query.collect::<Vec<&str>>().join(" ");
             if tags_collected.trim().is_empty() {
-                Err(anyhow!("Invalid query"))
+                Err(anyhow!("Tags não podem ser vazias"))
             } else {
                 let query = tags_collected.split('\'').collect::<Vec<&str>>();
                 let mut tags = Vec::new();
@@ -43,7 +43,7 @@ fn parse_query(query: &str) -> Result<Query> {
                     if i % 2 == 1 {
                         tags.push(tag.to_string());
                     } else if !tag.trim().is_empty() {
-                        anyhow::bail!("Invalid query");
+                        anyhow::bail!("Tags devem estar entre aspas simples");
                     }
                 }
                 Ok(Query::Tags(tags))
@@ -56,20 +56,20 @@ fn parse_query(query: &str) -> Result<Query> {
                 let prompt = prompt.strip_prefix("top");
                 if let Some(prompt) = prompt {
                     let i = prompt.parse::<i32>()?;
-                    let pos = query.next().ok_or_else(|| anyhow::anyhow!("Invalid query"))?;
+                    let pos = query.next().ok_or_else(|| anyhow::anyhow!("Posição não pode ser vazia"))?;
                     //remove the '
-                    let pos = pos.strip_prefix("'").ok_or_else(|| anyhow::anyhow!("Invalid query"))?;
-                    let pos = pos.strip_suffix("'").ok_or_else(|| anyhow::anyhow!("Invalid query"))?;
+                    let pos = pos.strip_prefix('\'').ok_or_else(|| anyhow::anyhow!("Posição deve começar com aspas simples"))?;
+                    let pos = pos.strip_suffix('\'').ok_or_else(|| anyhow::anyhow!("Posição deve terminar com aspas simples"))?;
 
                     Ok(Query::Top(i, pos.to_string()))
                 } else {
-                    Err(anyhow::anyhow!("Invalid query"))
+                    Err(anyhow::anyhow!("Comando inválido"))
                 }
             } else {
-                Err(anyhow::anyhow!("Invalid query"))
+                Err(anyhow::anyhow!("Comando inválido"))
             }
         }
-        None => Err(anyhow::anyhow!("Invalid query"))
+        None => Err(anyhow::anyhow!("Comando inválido")),
     }
 }
 
