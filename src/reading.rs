@@ -5,9 +5,7 @@ use crate::knowledge::DB;
 use crate::models::*;
 
 #[allow(dead_code)]
-pub async fn read_tags(
-    db: &mut DB
-) -> Result<(), anyhow::Error> {
+pub async fn read_tags(db: &mut DB) -> Result<(), anyhow::Error> {
     let mut tag_reader = Reader::from_path("data/tags.csv")?;
 
     tag_reader
@@ -22,9 +20,7 @@ pub async fn read_tags(
 }
 
 #[allow(dead_code)]
-pub async fn read_rating(
-    db: &mut DB
-) -> Result<(), anyhow::Error> {
+pub async fn read_rating(db: &mut DB) -> Result<(), anyhow::Error> {
     let mut reader = Reader::from_path("data/rating.csv")?;
     let mut count = 0;
     for result in reader.deserialize() {
@@ -39,9 +35,7 @@ pub async fn read_rating(
 }
 
 #[allow(dead_code)]
-pub async fn read_jogadores(
-    db: &mut DB
-) -> Result<(), anyhow::Error> {
+pub async fn read_jogadores(db: &mut DB) -> Result<(), anyhow::Error> {
     let mut reader = Reader::from_path("data/players.csv")?;
     reader
         .deserialize()
@@ -52,7 +46,6 @@ pub async fn read_jogadores(
         })?;
     Ok(())
 }
-
 
 pub async fn initialize(db: &mut DB) -> Result<()> {
     let start = std::time::Instant::now();

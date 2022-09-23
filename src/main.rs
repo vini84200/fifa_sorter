@@ -1,10 +1,10 @@
 use anyhow::{Ok, Result};
 
-pub mod structures;
-mod models;
-mod reading;
 mod knowledge;
+mod models;
 mod parser;
+mod reading;
+pub mod structures;
 
 #[cfg(feature = "terminal")]
 mod terminal;

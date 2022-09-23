@@ -5,15 +5,19 @@ use anyhow::Result;
 use super::tst::Tst;
 
 #[derive(Clone, Debug, Default)]
-pub struct MultiTst<T> where T: Debug + Clone + Default {
+pub struct MultiTst<T>
+    where
+        T: Debug + Clone + Default,
+{
     tst: Tst<Vec<T>>,
 }
 
-impl<T> MultiTst<T> where T: Debug + Clone + Default + PartialEq {
+impl<T> MultiTst<T>
+    where
+        T: Debug + Clone + Default + PartialEq,
+{
     pub fn new() -> Self {
-        MultiTst {
-            tst: Tst::new()
-        }
+        MultiTst { tst: Tst::new() }
     }
 
     pub fn insert(&mut self, key: String, value: T) -> Result<()> {
@@ -30,7 +34,8 @@ impl<T> MultiTst<T> where T: Debug + Clone + Default + PartialEq {
     }
 
     pub fn find(&self, prefix: String) -> Vec<T> {
-        self.tst.find_from_prefix(prefix)
+        self.tst
+            .find_from_prefix(prefix)
             .iter()
             .flat_map(|a| a.1.clone())
             .collect()

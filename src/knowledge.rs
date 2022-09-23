@@ -1,9 +1,10 @@
 use anyhow::anyhow;
 
-use crate::{models::{Jogador, JogadorComRating, Rating, Tag, User},
-            parser::Query,
-            structures::{hash_table::HashTable,
-                         multi_tst::MultiTst}};
+use crate::{
+    models::{Jogador, JogadorComRating, Rating, Tag, User},
+    parser::Query,
+    structures::{hash_table::HashTable, multi_tst::MultiTst},
+};
 use crate::structures::btree::BTree;
 
 const JOGADOR_SIZE: usize = 22807;
@@ -34,8 +35,10 @@ impl JogadoresDB {
 
     fn insert(&mut self, jogador: Jogador) -> Result<(), anyhow::Error> {
         // println!("Inserting jogador {} - {}", jogador.get_id(), jogador.get_name());
-        self.ht.insert(&jogador.get_id(), JogadorComRating::from(jogador.clone()))?;
-        self.full_trie.insert(jogador.get_name().clone(), jogador.get_id())?;
+        self.ht
+            .insert(&jogador.get_id(), JogadorComRating::from(jogador.clone()))?;
+        self.full_trie
+            .insert(jogador.get_name().clone(), jogador.get_id())?;
 
         Ok(())
     }
@@ -45,21 +48,29 @@ impl JogadoresDB {
     }
 
     fn search(&self, name: String) -> Vec<JogadorComRating> {
-        self.full_trie.find(name).iter().map(|a| self.get(*a).unwrap()).collect()
+        self.full_trie
+            .find(name)
+            .iter()
+            .map(|a| self.get(*a).unwrap())
+            .collect()
     }
 
     fn insert_tag(&mut self, tag: Tag) -> Result<(), anyhow::Error> {
         if let Some(jogadores) = self.tag.get_mut(&tag.get_tag().to_lowercase()) {
             jogadores.push(tag.get_id());
         } else {
-            self.tag.insert(&tag.get_tag().to_lowercase(), vec![tag.get_id()])?;
+            self.tag
+                .insert(&tag.get_tag().to_lowercase(), vec![tag.get_id()])?;
         }
         self.ht.get_mut(&tag.get_id()).unwrap().add_tag(tag);
         Ok(())
     }
 
     fn add_rating(&mut self, rating: Rating) -> Result<(), anyhow::Error> {
-        self.ht.get_mut(&rating.get_sofifa_id()).unwrap().add_rating(rating.get_rating());
+        self.ht
+            .get_mut(&rating.get_sofifa_id())
+            .unwrap()
+            .add_rating(rating.get_rating());
         Ok(())
     }
 
@@ -94,9 +105,7 @@ impl UsersDB {
     fn new() -> Self {
         let ht = HashTable::new(USER_SIZE);
 
-        UsersDB {
-            ht,
-        }
+        UsersDB { ht }
     }
 
     fn insert(&mut self, user: User) -> Result<(), anyhow::Error> {
@@ -131,10 +140,7 @@ impl DB {
         let jogadores = JogadoresDB::new();
         let users = UsersDB::new();
 
-        DB {
-            jogadores,
-            users,
-        }
+        DB { jogadores, users }
     }
 
     pub fn insert_jogador(&mut self, jogador: Jogador) -> Result<(), anyhow::Error> {
@@ -143,14 +149,11 @@ impl DB {
         Ok(())
     }
 
-
     pub fn insert_rating(&mut self, rating: Rating) -> Result<(), anyhow::Error> {
         if let Some(user) = self.users.get_mut(rating.get_user_id()) {
             user.add_rating(&rating);
         } else {
-            self.users.insert(
-                User::from_rating(rating.clone())
-            )?;
+            self.users.insert(User::from_rating(rating.clone()))?;
         }
         self.jogadores.add_rating(rating)?;
 
@@ -197,19 +200,33 @@ impl DB {
                 }
             }
             Query::Top(n, position) => {
-                let jogadores = self.jogadores.pos_ht.get(&position).unwrap().get_greatest_n(n as u32).iter().map(|a| self.jogadores.get(*a).unwrap()).collect::<Vec<JogadorComRating>>();
+                let jogadores = self
+                    .jogadores
+                    .pos_ht
+                    .get(&position)
+                    .unwrap()
+                    .get_greatest_n(n as u32)
+                    .iter()
+                    .map(|a| self.jogadores.get(*a).unwrap())
+                    .collect::<Vec<JogadorComRating>>();
                 Ok(QueryResult::Jogadores(jogadores))
             }
             Query::Tags(tags) => {
                 let mut tags_iter = tags.iter();
                 let first_tag: &String = tags_iter.next().unwrap();
-                let mut last_jogadores = self.jogadores.tag.get(&first_tag.to_lowercase())
+                let mut last_jogadores = self
+                    .jogadores
+                    .tag
+                    .get(&first_tag.to_lowercase())
                     .iter()
                     .flatten()
                     .map(|a| self.jogadores.get(*a).unwrap())
                     .collect::<Vec<JogadorComRating>>();
                 for tag in tags_iter {
-                    let jogadores = self.jogadores.tag.get(&tag.to_lowercase())
+                    let jogadores = self
+                        .jogadores
+                        .tag
+                        .get(&tag.to_lowercase())
                         .iter()
                         .flatten()
                         .map(|a| self.jogadores.get(*a).unwrap())
@@ -229,10 +246,7 @@ impl DB {
                 } else {
                     Ok(QueryResult::Jogadores(vec![]))
                 }
-            }
-            // _ => Err(anyhow!("Query not implemented")),
+            } // _ => Err(anyhow!("Query not implemented")),
         }
     }
-
 }
-

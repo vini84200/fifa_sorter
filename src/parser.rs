@@ -20,17 +20,13 @@ fn parse_query(query: &str) -> Result<Query> {
                 Ok(Query::Player(name))
             }
         }
-        Some("user") => {
-            match query.next() {
-                Some(user) => {
-                    match user.parse::<u32>() {
-                        Ok(user) => Ok(Query::User(user)),
-                        Err(_) => anyhow::bail!("ID de usuário inválido"),
-                    }
-                }
-                None => anyhow::bail!("ID de usuário não pode ser vazio"),
-            }
-        }
+        Some("user") => match query.next() {
+            Some(user) => match user.parse::<u32>() {
+                Ok(user) => Ok(Query::User(user)),
+                Err(_) => anyhow::bail!("ID de usuário inválido"),
+            },
+            None => anyhow::bail!("ID de usuário não pode ser vazio"),
+        },
         Some("tags") => {
             // Format: tags 'tag1' 'tag2' 'tag3 that is long'
             let tags_collected: String = query.collect::<Vec<&str>>().join(" ");
@@ -55,10 +51,16 @@ fn parse_query(query: &str) -> Result<Query> {
                 let prompt = prompt.strip_prefix("top");
                 if let Some(prompt) = prompt {
                     let i = prompt.parse::<i32>()?;
-                    let pos = query.next().ok_or_else(|| anyhow::anyhow!("Posição não pode ser vazia"))?;
+                    let pos = query
+                        .next()
+                        .ok_or_else(|| anyhow::anyhow!("Posição não pode ser vazia"))?;
                     //remove the '
-                    let pos = pos.strip_prefix('\'').ok_or_else(|| anyhow::anyhow!("Posição deve começar com aspas simples"))?;
-                    let pos = pos.strip_suffix('\'').ok_or_else(|| anyhow::anyhow!("Posição deve terminar com aspas simples"))?;
+                    let pos = pos
+                        .strip_prefix('\'')
+                        .ok_or_else(|| anyhow::anyhow!("Posição deve começar com aspas simples"))?;
+                    let pos = pos.strip_suffix('\'').ok_or_else(|| {
+                        anyhow::anyhow!("Posição deve terminar com aspas simples")
+                    })?;
 
                     Ok(Query::Top(i, pos.to_string()))
                 } else {

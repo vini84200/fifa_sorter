@@ -34,7 +34,6 @@ impl Display for Positons {
     }
 }
 
-
 impl Display for Tags {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut tags = String::new();
@@ -51,12 +50,17 @@ impl PartialEq for JogadorComRating {
     }
 }
 
-
 impl From<Jogador> for JogadorComRating {
     fn from(jogador: Jogador) -> Self {
         JogadorComRating {
             nome: jogador.name,
-            posicoes: Positons { player_positions: jogador.player_positions.split(',').map(|s| s.trim().to_string()).collect() },
+            posicoes: Positons {
+                player_positions: jogador
+                    .player_positions
+                    .split(',')
+                    .map(|s| s.trim().to_string())
+                    .collect(),
+            },
             nota: 0.0,
             avaliacoes: 0,
             tags: Tags::default(),
@@ -67,8 +71,7 @@ impl From<Jogador> for JogadorComRating {
 
 impl JogadorComRating {
     pub fn add_rating(&mut self, rating: f32) {
-        self.nota = (self.nota * self.avaliacoes as f32 + rating)
-            / (self.avaliacoes + 1) as f32;
+        self.nota = (self.nota * self.avaliacoes as f32 + rating) / (self.avaliacoes + 1) as f32;
         self.avaliacoes += 1;
     }
 
@@ -104,7 +107,6 @@ impl JogadorComRating {
 }
 
 impl Jogador {
-
     pub fn get_id(&self) -> u32 {
         self.sofifa_id
     }
@@ -114,7 +116,6 @@ impl Jogador {
     }
 }
 
-
 #[derive(Debug, Clone, Deserialize)]
 pub struct Rating {
     user_id: u32,
@@ -123,7 +124,6 @@ pub struct Rating {
 }
 
 impl Rating {
-
     pub fn get_user_id(&self) -> u32 {
         self.user_id
     }
@@ -171,7 +171,6 @@ pub struct Tag {
 }
 
 impl Tag {
-
     pub fn get_id(&self) -> u32 {
         self.sofifa_id
     }

@@ -12,7 +12,6 @@ struct Node<K, V> {
 pub struct BTree<K, V> {
     root: Node<K, V>,
     props: BTreeProps,
-
 }
 
 #[derive(Debug, Clone)]
@@ -21,9 +20,9 @@ struct BTreeProps;
 const PAGE: usize = 2048;
 
 impl<K, V> Node<K, V>
-    where
-        K: PartialOrd + Clone,
-        V: Clone
+where
+    K: PartialOrd + Clone,
+    V: Clone,
 {
     const ORDER: usize = (PAGE - size_of::<Node<K, V>>()) / (size_of::<K>() + size_of::<V>());
     const _MIN_KEYS: usize = (Self::ORDER - 1) / 2;
@@ -31,7 +30,11 @@ impl<K, V> Node<K, V>
 
     const MID_KEYS: usize = (Self::ORDER - 1) / 2;
 
-    fn new(_keys: Option<Vec<K>>, _values: Option<Vec<V>>, _children: Option<Vec<Node<K, V>>>) -> Self {
+    fn new(
+        _keys: Option<Vec<K>>,
+        _values: Option<Vec<V>>,
+        _children: Option<Vec<Node<K, V>>>,
+    ) -> Self {
         assert!(Self::ORDER > 2);
         Node {
             keys: _keys.unwrap_or_else(|| Vec::with_capacity(Self::MAX_KEYS)),
@@ -91,7 +94,11 @@ impl BTreeProps {
         node.keys.len() == Node::<K, V>::MAX_KEYS
     }
 
-    fn split_child<K: PartialOrd + Copy + Default, V: Clone>(&self, parent: &mut Node<K, V>, child_index: usize) {
+    fn split_child<K: PartialOrd + Copy + Default, V: Clone>(
+        &self,
+        parent: &mut Node<K, V>,
+        child_index: usize,
+    ) {
         let child = &mut parent.children[child_index];
         let middle_key = child.keys[Node::<K, V>::MID_KEYS];
         let middle_value = child.values[Node::<K, V>::MID_KEYS].clone();
@@ -105,25 +112,25 @@ impl BTreeProps {
             None => Vec::with_capacity(Node::<K, V>::MAX_KEYS),
         };
 
-
         let right_children = if !child.is_leaf() {
             Some(child.children.split_off(Node::<K, V>::MID_KEYS + 1))
         } else {
             None
         };
 
-        let new_child = Node::new(
-            Some(right_keys),
-            Some(right_values),
-            right_children,
-        );
+        let new_child = Node::new(Some(right_keys), Some(right_values), right_children);
 
         parent.keys.insert(child_index, middle_key);
         parent.values.insert(child_index, middle_value);
         parent.children.insert(child_index + 1, new_child);
     }
 
-    fn insert_non_full<K: PartialOrd + Copy + Default, V: Clone>(&self, node: &mut Node<K, V>, key: K, value: V) {
+    fn insert_non_full<K: PartialOrd + Copy + Default, V: Clone>(
+        &self,
+        node: &mut Node<K, V>,
+        key: K,
+        value: V,
+    ) {
         if node.is_leaf() {
             let mut i = node.keys.len();
             while i > 0 && key < node.keys[i - 1] {
@@ -150,7 +157,7 @@ impl BTreeProps {
 impl<K, V> Default for BTree<K, V>
     where
         K: PartialOrd + Copy + Default,
-        V: Default + Clone
+        V: Default + Clone,
 {
     fn default() -> Self {
         BTree {
@@ -163,7 +170,7 @@ impl<K, V> Default for BTree<K, V>
 impl<K, V> BTree<K, V>
     where
         K: PartialOrd + Copy + Default,
-        V: Default + Clone
+        V: Default + Clone,
 {
     pub fn new() -> Self {
         BTree {
@@ -214,10 +221,13 @@ impl<K, V> BTree<K, V>
     }
 
     pub fn get_greatest_n(&self, n: u32) -> Vec<V> {
-        self.root.get_n_greatest(n as usize).into_iter().map(|(_, v)| v).collect()
+        self.root
+            .get_n_greatest(n as usize)
+            .into_iter()
+            .map(|(_, v)| v)
+            .collect()
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -266,7 +276,12 @@ mod tests {
         tree.insert(8, BigStruct { a: [0; 500] });
         tree.insert(-1, BigStruct { a: [0; 500] });
         tree.insert(0, BigStruct { a: [0; 500] });
-        println!("Order: {:#?} - MAX: {} - MIN : {}", Node::<i32, BigStruct>::ORDER, Node::<i32, BigStruct>::MAX_KEYS, Node::<i32, BigStruct>::_MIN_KEYS);
+        println!(
+            "Order: {:#?} - MAX: {} - MIN : {}",
+            Node::<i32, BigStruct>::ORDER,
+            Node::<i32, BigStruct>::MAX_KEYS,
+            Node::<i32, BigStruct>::_MIN_KEYS
+        );
 
         println!("{:#?}", tree);
     }
@@ -299,7 +314,12 @@ mod tests {
         tree.insert(8, BigStruct { a: [0; 500] });
         tree.insert(-1, BigStruct { a: [0; 500] });
         tree.insert(0, BigStruct { a: [0; 500] });
-        println!("Order: {:#?} - MAX: {} - MIN : {}", Node::<i32, BigStruct>::ORDER, Node::<i32, BigStruct>::MAX_KEYS, Node::<i32, BigStruct>::_MIN_KEYS);
+        println!(
+            "Order: {:#?} - MAX: {} - MIN : {}",
+            Node::<i32, BigStruct>::ORDER,
+            Node::<i32, BigStruct>::MAX_KEYS,
+            Node::<i32, BigStruct>::_MIN_KEYS
+        );
 
         assert_eq!(tree.find(1), Some(&BigStruct { a: [2; 500] }));
         assert_eq!(tree.find(2), Some(&BigStruct { a: [0; 500] }));
@@ -346,10 +366,31 @@ mod tests {
         tree.insert(8, BigStruct { a: [9; 500] });
         tree.insert(-1, BigStruct { a: [0; 500] });
         tree.insert(0, BigStruct { a: [0; 500] });
-        println!("Order: {:#?} - MAX: {} - MIN : {}", Node::<i32, BigStruct>::ORDER, Node::<i32, BigStruct>::MAX_KEYS, Node::<i32, BigStruct>::_MIN_KEYS);
+        println!(
+            "Order: {:#?} - MAX: {} - MIN : {}",
+            Node::<i32, BigStruct>::ORDER,
+            Node::<i32, BigStruct>::MAX_KEYS,
+            Node::<i32, BigStruct>::_MIN_KEYS
+        );
 
-        assert_eq!(tree.get_greatest_n(3), vec![BigStruct { a: [9; 500] }, BigStruct { a: [6; 500] }, BigStruct { a: [0; 500] }]);
-        assert_eq!(tree.get_greatest_n(5), vec![BigStruct { a: [9; 500] }, BigStruct { a: [6; 500] }, BigStruct { a: [0; 500] }, BigStruct { a: [0; 500] }, BigStruct { a: [0; 500] }]);
+        assert_eq!(
+            tree.get_greatest_n(3),
+            vec![
+                BigStruct { a: [9; 500] },
+                BigStruct { a: [6; 500] },
+                BigStruct { a: [0; 500] },
+            ]
+        );
+        assert_eq!(
+            tree.get_greatest_n(5),
+            vec![
+                BigStruct { a: [9; 500] },
+                BigStruct { a: [6; 500] },
+                BigStruct { a: [0; 500] },
+                BigStruct { a: [0; 500] },
+                BigStruct { a: [0; 500] },
+            ]
+        );
         assert_eq!(tree.get_greatest_n(0), vec![]);
 
         assert_eq!(tree.get_greatest_n(1), vec![BigStruct { a: [9; 500] }]);

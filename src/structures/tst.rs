@@ -4,21 +4,29 @@ use core::fmt::Debug;
 use anyhow::Result;
 
 #[derive(Debug, Clone)]
-struct TstNode<T> where T: Default + Debug {
+struct TstNode<T>
+    where
+        T: Default + Debug,
+{
     esq: Option<Box<TstNode<T>>>,
     dir: Option<Box<TstNode<T>>>,
     next: Option<Box<TstNode<T>>>,
     content: Option<T>,
     c: char,
-
 }
 
 #[derive(Debug, Default, Clone)]
-pub struct Tst<T> where T: Default + Debug + Clone {
+pub struct Tst<T>
+    where
+        T: Default + Debug + Clone,
+{
     root: TstNode<T>,
 }
 
-impl<T> TstNode<T> where T: Default + Debug + Clone {
+impl<T> TstNode<T>
+    where
+        T: Default + Debug + Clone,
+{
     pub fn insert(&mut self, word: &str, content: T) -> Result<()> {
         let word = word.to_lowercase();
         self._insert(&word, content, 0)?;
@@ -40,7 +48,10 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
                         next.c = c;
                     }
                     self.next = Some(Box::new(next));
-                    self.next.as_mut().unwrap()._insert(word, content, scanned + 1)?;
+                    self.next
+                        .as_mut()
+                        .unwrap()
+                        ._insert(word, content, scanned + 1)?;
                 }
             } else if c < self.c {
                 if let Some(a) = &mut self.esq {
@@ -85,7 +96,9 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
                     self.content.clone()
                 } else if let Some(next) = &self.next {
                     next._get(word, scanned + 1)
-                } else { None }
+                } else {
+                    None
+                }
             } else if c < self.c {
                 if let Some(a) = &self.esq {
                     a._get(word, scanned)
@@ -150,7 +163,9 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
                     self._get_child_words(prefix)
                 } else if let Some(next) = &self.next {
                     next._find_from_prefix(prefix, scanned + 1)
-                } else { vec![] }
+                } else {
+                    vec![]
+                }
             } else if c < self.c {
                 if let Some(a) = &self.esq {
                     a._find_from_prefix(prefix, scanned)
@@ -184,15 +199,15 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
     }
 
     fn pre_process(word: String) -> String {
-        let word = word
-            .to_lowercase()
-            .trim()
-            .to_string();
+        let word = word.to_lowercase().trim().to_string();
         word
     }
 }
 
-impl<T> Default for TstNode<T> where T: Clone + Debug + Default {
+impl<T> Default for TstNode<T>
+    where
+        T: Clone + Debug + Default,
+{
     fn default() -> Self {
         Self {
             c: ' ',
@@ -204,10 +219,13 @@ impl<T> Default for TstNode<T> where T: Clone + Debug + Default {
     }
 }
 
-impl<T> Tst<T> where T: Clone + Default + Debug {
+impl<T> Tst<T>
+    where
+        T: Clone + Default + Debug,
+{
     pub fn new() -> Self {
         Self {
-            root: TstNode::<T>::default()
+            root: TstNode::<T>::default(),
         }
     }
 
@@ -277,9 +295,22 @@ mod tests {
         tst.insert(&String::from("hora"), 2).unwrap();
         tst.insert(&String::from("bala"), 4).unwrap();
 
-        assert_eq!(tst.find_from_prefix(String::from("bo")), vec![("bola".to_string(), 1), ("bolo".to_string(), 5)]);
-        assert_eq!(tst.find_from_prefix(String::from("b")), vec![("bola".to_string(), 1), ("bolo".to_string(), 5), ("bala".to_string(), 4)]);
-        assert_eq!(tst.find_from_prefix(String::from("h")), vec![("hora".to_string(), 2)]);
+        assert_eq!(
+            tst.find_from_prefix(String::from("bo")),
+            vec![("bola".to_string(), 1), ("bolo".to_string(), 5)]
+        );
+        assert_eq!(
+            tst.find_from_prefix(String::from("b")),
+            vec![
+                ("bola".to_string(), 1),
+                ("bolo".to_string(), 5),
+                ("bala".to_string(), 4),
+            ]
+        );
+        assert_eq!(
+            tst.find_from_prefix(String::from("h")),
+            vec![("hora".to_string(), 2)]
+        );
     }
 
     #[test]
@@ -319,9 +350,22 @@ mod tests {
         assert_eq!(tst.get(String::from("bola")), Some(2));
         assert_eq!(tst.get(String::from("bolo")), Some(5));
 
-        assert_eq!(tst.find_from_prefix(String::from("bo")), vec![("bola".to_string(), 2), ("bolo".to_string(), 5)]);
-        assert_eq!(tst.find_from_prefix(String::from("b")), vec![("bola".to_string(), 2), ("bolo".to_string(), 5), ("bala".to_string(), 4)]);
-        assert_eq!(tst.find_from_prefix(String::from("h")), vec![("hora".to_string(), 2)]);
+        assert_eq!(
+            tst.find_from_prefix(String::from("bo")),
+            vec![("bola".to_string(), 2), ("bolo".to_string(), 5)]
+        );
+        assert_eq!(
+            tst.find_from_prefix(String::from("b")),
+            vec![
+                ("bola".to_string(), 2),
+                ("bolo".to_string(), 5),
+                ("bala".to_string(), 4),
+            ]
+        );
+        assert_eq!(
+            tst.find_from_prefix(String::from("h")),
+            vec![("hora".to_string(), 2)]
+        );
 
         assert!(tst.get_words().contains(&("bola".to_string(), 2)));
         assert!(tst.get_words().contains(&("bolo".to_string(), 5)));
@@ -341,6 +385,9 @@ mod tests {
         assert_eq!(tst.get(String::from("bala")), None);
         assert_eq!(tst.get(String::from("BOLO")), Some(5));
 
-        assert_eq!(tst.find_from_prefix(String::from("BO")), vec![("bola".to_string(), 1), ("bolo".to_string(), 5)]);
+        assert_eq!(
+            tst.find_from_prefix(String::from("BO")),
+            vec![("bola".to_string(), 1), ("bolo".to_string(), 5)]
+        );
     }
 }

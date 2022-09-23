@@ -23,7 +23,9 @@ pub async fn main_loop() {
         let line = line_editor.read_line(&prompt);
         match line {
             Ok(Signal::Success(buffer)) => {
-                if buffer.trim().is_empty() { continue; }
+                if buffer.trim().is_empty() {
+                    continue;
+                }
 
                 if buffer.trim() == "exit" || buffer.trim() == "quit" || buffer.trim() == "q" {
                     break;
@@ -37,7 +39,7 @@ pub async fn main_loop() {
                         println!("Query executada em {:?}", elapsed);
                         match res {
                             Ok(res) => print_res(res, &db),
-                            Err(e) => println!("Erro na execução da query: {}", e)
+                            Err(e) => println!("Erro na execução da query: {}", e),
                         }
                     }
                     Err(e) => {
@@ -53,8 +55,7 @@ pub async fn main_loop() {
             x => {
                 println!("Erro: {:?}", x);
                 break;
-            }
-            // println!("{:?}", query);
+            } // println!("{:?}", query);
         }
     }
 }
@@ -82,9 +83,10 @@ fn show_jogadores(jogadores: &Vec<JogadorComRating>) {
     let mut page = 1;
 
     loop {
-        let table = Table::new(&jogadores[(page - 1) * 20..std::cmp::min(page * 20, jogadores.len())])
-            .with(Style::modern())
-            .with(Modify::new(Segment::all()).with(Width::wrap(19)));
+        let table =
+            Table::new(&jogadores[(page - 1) * 20..std::cmp::min(page * 20, jogadores.len())])
+                .with(Style::modern())
+                .with(Modify::new(Segment::all()).with(Width::wrap(19)));
 
         println!("{}", table);
         let max_pages = (jogadores.len() as f32 / 20.0).ceil() as u32;
@@ -92,18 +94,18 @@ fn show_jogadores(jogadores: &Vec<JogadorComRating>) {
             println!("Página {}/{}", page, max_pages);
             println!("Pressione 'q' para sair, pressione Enter para a próxima página, 'p' para a página anterior ou digite um número para ir para uma página específica");
 
-
             let mut line_editor = Reedline::create();
             let prompt = PagerPrompt::new(page, max_pages as usize);
             let line = line_editor.read_line(&prompt);
-            if line.is_err() { break; }
+            if line.is_err() {
+                break;
+            }
             let line = line.unwrap();
             match line {
                 Signal::Success(a) => {
                     if a.trim().is_empty() && page < max_pages as usize {
                         page += 1;
-                    } else if a.trim() == "q"
-                    {
+                    } else if a.trim() == "q" {
                         break;
                     } else if a.trim() == "p" {
                         if page > 1 {
@@ -164,7 +166,10 @@ impl Avaliacao {
         while gap > 0 {
             for i in gap..aval.len() {
                 let mut j = i;
-                while j >= gap && Avaliacao::sort_by_rating(&aval[j - gap], &aval[j]) == std::cmp::Ordering::Greater {
+                while j >= gap
+                    && Avaliacao::sort_by_rating(&aval[j - gap], &aval[j])
+                    == std::cmp::Ordering::Greater
+                {
                     aval.swap(j, j - gap);
                     j -= gap;
                 }
@@ -182,28 +187,29 @@ fn show_user(user: User, db: &DB) {
     if avaliacoes.len() > 20 {
         println!("Mostrando as 20 primeiras avaliações");
     }
-    let ratings = avaliacoes.iter().map(|r| {
-        let jogador = db.get_jogador(r.get_sofifa_id());
-        let jogador = jogador.unwrap();
-        Avaliacao {
-            id: r.get_sofifa_id(),
-            jogador: jogador.get_name().to_string(),
-            nota: r.get_rating(),
-            nota_geral: jogador.get_rating(),
-            count: jogador.get_rating_count(),
-        }
-    }).collect::<Vec<Avaliacao>>();
+    let ratings = avaliacoes
+        .iter()
+        .map(|r| {
+            let jogador = db.get_jogador(r.get_sofifa_id());
+            let jogador = jogador.unwrap();
+            Avaliacao {
+                id: r.get_sofifa_id(),
+                jogador: jogador.get_name().to_string(),
+                nota: r.get_rating(),
+                nota_geral: jogador.get_rating(),
+                count: jogador.get_rating_count(),
+            }
+        })
+        .collect::<Vec<Avaliacao>>();
     let mut ratings = Avaliacao::sorts(ratings);
     ratings.reverse();
     let ratings = &ratings[..std::cmp::min(20, ratings.len())];
-
 
     let table = Table::new(ratings)
         .with(Style::modern())
         .with(Modify::new(Segment::all()).with(Width::wrap(19)));
     println!("{}", table);
 }
-
 
 #[derive(Default)]
 struct CleanPrompt;
@@ -225,11 +231,13 @@ impl Prompt for CleanPrompt {
         "| ".into()
     }
 
-    fn render_prompt_history_search_indicator(&self, _history_search: PromptHistorySearch) -> Cow<str> {
+    fn render_prompt_history_search_indicator(
+        &self,
+        _history_search: PromptHistorySearch,
+    ) -> Cow<str> {
         "? ".into()
     }
 }
-
 
 struct PagerPrompt {
     page: usize,
@@ -253,16 +261,16 @@ impl Prompt for PagerPrompt {
         "| ".into()
     }
 
-    fn render_prompt_history_search_indicator(&self, _history_search: PromptHistorySearch) -> Cow<str> {
+    fn render_prompt_history_search_indicator(
+        &self,
+        _history_search: PromptHistorySearch,
+    ) -> Cow<str> {
         "?".into()
     }
 }
 
 impl PagerPrompt {
     fn new(page: usize, max_page: usize) -> Self {
-        Self {
-            page,
-            max_page,
-        }
+        Self { page, max_page }
     }
 }
