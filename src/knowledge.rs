@@ -1,11 +1,11 @@
 use anyhow::anyhow;
 
+use crate::structures::btree::BTree;
 use crate::{
     models::{Jogador, JogadorComRating, Rating, Tag, User},
     parser::Query,
     structures::{hash_table::HashTable, multi_tst::MultiTst},
 };
-use crate::structures::btree::BTree;
 
 const JOGADOR_SIZE: usize = 22807;
 const TAG_SIZE: usize = 438001;

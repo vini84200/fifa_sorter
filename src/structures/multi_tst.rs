@@ -13,8 +13,8 @@ where
 }
 
 impl<T> MultiTst<T>
-    where
-        T: Debug + Clone + Default + PartialEq,
+where
+    T: Debug + Clone + Default + PartialEq,
 {
     pub fn new() -> Self {
         MultiTst { tst: Tst::new() }

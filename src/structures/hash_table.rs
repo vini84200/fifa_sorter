@@ -105,8 +105,8 @@ where
     }
 
     pub fn for_each<F>(&self, mut f: F)
-        where
-            F: FnMut(&K, &V),
+    where
+        F: FnMut(&K, &V),
     {
         for i in &self.items {
             for a in &i.item {
@@ -117,11 +117,11 @@ where
 }
 
 impl<U, T> Extend<(U, T)> for HashTable<U, T>
-    where
-        U: Clone + Default + Hashable + PartialEq,
-        T: Clone + Default,
+where
+    U: Clone + Default + Hashable + PartialEq,
+    T: Clone + Default,
 {
-    fn extend<I: IntoIterator<Item=(U, T)>>(&mut self, iter: I) {
+    fn extend<I: IntoIterator<Item = (U, T)>>(&mut self, iter: I) {
         for (k, v) in iter {
             self.insert(&k, v).unwrap();
         }

@@ -1,10 +1,10 @@
 use std::borrow::Cow;
 
 use reedline::{Prompt, PromptEditMode, PromptHistorySearch, Reedline, Signal};
-use tabled::{Modify, Style, Table, Tabled, Width};
 use tabled::object::Segment;
+use tabled::{Modify, Style, Table, Tabled, Width};
 
-use crate::knowledge::{DB, QueryResult};
+use crate::knowledge::{QueryResult, DB};
 use crate::models::{JogadorComRating, User};
 use crate::parser::Query;
 use crate::reading::initialize;
@@ -168,7 +168,7 @@ impl Avaliacao {
                 let mut j = i;
                 while j >= gap
                     && Avaliacao::sort_by_rating(&aval[j - gap], &aval[j])
-                    == std::cmp::Ordering::Greater
+                        == std::cmp::Ordering::Greater
                 {
                     aval.swap(j, j - gap);
                     j -= gap;

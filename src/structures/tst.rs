@@ -17,15 +17,15 @@ where
 
 #[derive(Debug, Default, Clone)]
 pub struct Tst<T>
-    where
-        T: Default + Debug + Clone,
+where
+    T: Default + Debug + Clone,
 {
     root: TstNode<T>,
 }
 
 impl<T> TstNode<T>
-    where
-        T: Default + Debug + Clone,
+where
+    T: Default + Debug + Clone,
 {
     pub fn insert(&mut self, word: &str, content: T) -> Result<()> {
         let word = word.to_lowercase();
@@ -205,8 +205,8 @@ impl<T> TstNode<T>
 }
 
 impl<T> Default for TstNode<T>
-    where
-        T: Clone + Debug + Default,
+where
+    T: Clone + Debug + Default,
 {
     fn default() -> Self {
         Self {
@@ -220,8 +220,8 @@ impl<T> Default for TstNode<T>
 }
 
 impl<T> Tst<T>
-    where
-        T: Clone + Default + Debug,
+where
+    T: Clone + Default + Debug,
 {
     pub fn new() -> Self {
         Self {

@@ -168,9 +168,9 @@ where
 }
 
 impl<K, V> BTree<K, V>
-    where
-        K: PartialOrd + Copy + Default,
-        V: Default + Clone,
+where
+    K: PartialOrd + Copy + Default,
+    V: Default + Clone,
 {
     pub fn new() -> Self {
         BTree {
