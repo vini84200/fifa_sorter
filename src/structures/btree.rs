@@ -10,7 +10,7 @@ struct Node<K, V> {
 
 #[derive(Debug, Clone)]
 pub struct BTree<K, V> {
-    root: Node<K,V>,
+    root: Node<K, V>,
     props: BTreeProps,
 
 }
@@ -21,9 +21,9 @@ struct BTreeProps;
 const PAGE: usize = 2048;
 
 impl<K, V> Node<K, V>
-where
-    K: PartialOrd + Clone,
-    V: Clone
+    where
+        K: PartialOrd + Clone,
+        V: Clone
 {
     const ORDER: usize = (PAGE - size_of::<Node<K, V>>()) / (size_of::<K>() + size_of::<V>());
     const MIN_KEYS: usize = (Self::ORDER - 1) / 2;
@@ -31,7 +31,7 @@ where
 
     const MID_KEYS: usize = (Self::ORDER - 1) / 2;
 
-    fn new(_keys: Option<Vec<K>>, _values: Option<Vec<V>>, _children: Option<Vec<Node<K,V>>>) -> Self {
+    fn new(_keys: Option<Vec<K>>, _values: Option<Vec<V>>, _children: Option<Vec<Node<K, V>>>) -> Self {
         assert!(Self::ORDER > 2);
         Node {
             keys: _keys.unwrap_or(Vec::with_capacity(Self::MAX_KEYS)),
@@ -96,7 +96,7 @@ impl BTreeProps {
         let middle_key = child.keys[Node::<K, V>::MID_KEYS];
         let middle_value = child.values[Node::<K, V>::MID_KEYS].clone();
 
-        let right_keys = match child.keys.split_off(Node::<K, V>::MID_KEYS ).split_first() {
+        let right_keys = match child.keys.split_off(Node::<K, V>::MID_KEYS).split_first() {
             Some((_, keys)) => keys.to_vec(),
             None => Vec::with_capacity(Node::<K, V>::MAX_KEYS),
         };
@@ -115,7 +115,7 @@ impl BTreeProps {
         let new_child = Node::new(
             Some(right_keys),
             Some(right_values),
-            right_children
+            right_children,
         );
 
         parent.keys.insert(child_index, middle_key);
@@ -147,7 +147,7 @@ impl BTreeProps {
     }
 }
 
-impl<K,V> Default for BTree<K, V>
+impl<K, V> Default for BTree<K, V>
     where
         K: PartialOrd + Copy + Default,
         V: Default + Clone
@@ -160,7 +160,7 @@ impl<K,V> Default for BTree<K, V>
     }
 }
 
-impl<K,V> BTree<K,V>
+impl<K, V> BTree<K, V>
     where
         K: PartialOrd + Copy + Default,
         V: Default + Clone
@@ -222,6 +222,7 @@ impl<K,V> BTree<K,V>
 #[cfg(test)]
 mod tests {
     use std::fmt::Debug;
+
     use super::*;
 
     #[derive(Clone, Eq, PartialEq)]
@@ -250,7 +251,6 @@ mod tests {
         tree.insert(4, 4);
 
         println!("{:#?}", tree);
-
     }
 
     #[test]
@@ -288,7 +288,7 @@ mod tests {
 
     #[test]
     fn find_big() {
-            let mut tree = BTree::new();
+        let mut tree = BTree::new();
         tree.insert(1, BIG { a: [2; 500] });
         tree.insert(2, BIG { a: [0; 500] });
         tree.insert(3, BIG { a: [0; 500] });

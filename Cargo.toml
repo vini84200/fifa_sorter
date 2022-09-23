@@ -24,9 +24,9 @@ tracing-log = "0.1"
 chumsky = "0.8.0"
 #TODO: iced = "0.4"
 tracing-subscriber = "0.3"
-reedline = { version = "0.11.0", optional = true}
-tabled = {version = "0.8", optional = true}
-term_size = { version = "1.0.0-beta1", optional = true}
+reedline = { version = "0.11.0", optional = true }
+tabled = { version = "0.8", optional = true }
+term_size = { version = "1.0.0-beta1", optional = true }
 [features]
 default = ["terminal"]
 terminal = ["reedline", "tabled", "term_size"]

@@ -48,7 +48,6 @@ fn parse_query(query: &str) -> Result<Query> {
                 }
                 Ok(Query::Tags(tags))
             }
-
         }
         Some(prompt) => {
             if prompt.starts_with("top") {

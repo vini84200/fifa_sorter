@@ -11,7 +11,7 @@ struct JogadoresDB {
     ht: HashTable<u32, JogadorComRating>,
     full_trie: MultiTst<u32>,
     tag: HashTable<String, Vec<u32>>,
-    pos_ht: HashTable<String, BTree<f32, u32>>
+    pos_ht: HashTable<String, BTree<f32, u32>>,
 }
 
 impl JogadoresDB {
@@ -25,7 +25,7 @@ impl JogadoresDB {
             ht,
             full_trie,
             tag,
-            pos_ht
+            pos_ht,
         }
     }
 
@@ -61,17 +61,16 @@ impl JogadoresDB {
     }
 
     fn populate_pos_ht(&mut self) {
-       self.ht.for_each(|_, jogador| {
-           let positions = jogador.get_pos().player_positions.clone();
-           let rating = jogador.get_rating();
-           let id = jogador.get_sofifa_id();
-           let count = jogador.get_rating_count();
+        self.ht.for_each(|_, jogador| {
+            let positions = jogador.get_pos().player_positions.clone();
+            let rating = jogador.get_rating();
+            let id = jogador.get_sofifa_id();
+            let count = jogador.get_rating_count();
             for pos in positions {
                 if self.pos_ht.contains_key(&pos) {
                     if count > 1000 {
                         self.pos_ht.get_mut(&pos).unwrap().insert(rating, id);
                     }
-
                 } else {
                     let mut btree = BTree::new();
                     if count > 1000 {
@@ -80,7 +79,7 @@ impl JogadoresDB {
                     self.pos_ht.insert(&pos, btree).unwrap();
                 }
             }
-       });
+        });
     }
 
     pub fn debug_trie(&self) {
@@ -195,18 +194,18 @@ impl DB {
                 } else {
                     Ok(QueryResult::Jogadores(jogadores))
                 }
-            },
+            }
             Query::User(id) => {
                 if let Some(user) = self.get_user(id) {
                     Ok(QueryResult::User(user))
                 } else {
                     Err(anyhow!("User not found"))
                 }
-            },
+            }
             Query::Top(n, position) => {
                 let jogadores = self.jogadores.pos_ht.get(&position).unwrap().get_greatest_n(n as u32).iter().map(|a| self.jogadores.get(*a).unwrap()).collect::<Vec<JogadorComRating>>();
                 Ok(QueryResult::Jogadores(jogadores))
-            },
+            }
             Query::Tags(tags) => {
                 let mut tags_iter = tags.iter();
                 let first_tag: &String = tags_iter.next().unwrap();
@@ -223,7 +222,6 @@ impl DB {
                         .filter(|a| last_jogadores.contains(a))
                         .collect::<Vec<JogadorComRating>>();
                     last_jogadores = jogadores;
-
                 }
                 // Remover duplicados
                 if last_jogadores.len() > 1 {
@@ -234,11 +232,10 @@ impl DB {
                         }
                     }
                     Ok(QueryResult::Jogadores(jogadores))
-                }
-                else {
+                } else {
                     Ok(QueryResult::Jogadores(vec![]))
                 }
-            },
+            }
             // _ => Err(anyhow!("Query not implemented")),
         }
     }

@@ -1,4 +1,5 @@
 use std::fmt::{Display, Formatter};
+
 use anyhow::anyhow;
 use serde::Deserialize;
 use tabled::Tabled;
@@ -11,11 +12,11 @@ pub struct Jogador {
 }
 
 #[derive(Debug, Clone, Default)]
-struct  Tags(Vec<String>);
+struct Tags(Vec<String>);
 
 #[derive(Debug, Clone, Default)]
 pub struct Positons {
-    pub player_positions: Vec<String>
+    pub player_positions: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, Tabled)]
@@ -50,7 +51,6 @@ impl PartialEq for JogadorComRating {
         self.id == other.id
     }
 }
-
 
 
 impl From<Jogador> for JogadorComRating {

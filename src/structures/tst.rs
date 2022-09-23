@@ -41,7 +41,6 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
                     }
                     self.next = Some(Box::new(next));
                     self.next.as_mut().unwrap()._insert(word, content, scanned + 1)?;
-
                 }
             } else if c < self.c {
                 if let Some(a) = &mut self.esq {

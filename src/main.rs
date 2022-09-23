@@ -1,7 +1,5 @@
 use anyhow::{Ok, Result};
 
-use knowledge::DB;
-use reading::{read_jogadores, read_rating, read_tags};
 use crate::parser::Query;
 
 pub mod structures;

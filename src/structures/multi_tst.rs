@@ -39,8 +39,6 @@ impl<T> MultiTst<T> where T: Debug + Clone + Default + PartialEq {
     pub fn debug(&self) {
         self.tst.print_vertical();
     }
-
-
 }
 
 #[cfg(test)]

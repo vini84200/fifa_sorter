@@ -22,39 +22,39 @@ pub async fn main_loop() {
     let prompt = CleanPrompt::default();
     loop {
         let line = line_editor.read_line(&prompt);
-           match line {
-               Ok(Signal::Success(buffer)) => {
-                   if buffer.trim().is_empty() { continue; }
+        match line {
+            Ok(Signal::Success(buffer)) => {
+                if buffer.trim().is_empty() { continue; }
 
-                   if buffer.trim() == "exit" || buffer.trim() == "quit" || buffer.trim() == "q" {
-                       break;
-                   }
-                   let query = Query::try_from(buffer);
-                   match query {
-                       Ok(query) => {
-                           let start = std::time::Instant::now();
-                           let res = db.run_query(query);
-                           let elapsed = start.elapsed();
-                           println!("Query executada em {:?}", elapsed);
-                           match res {
-                               Ok(res) => print_res(res, &db),
-                               Err(e) => println!("Erro na execução da query: {}", e)
-                           }
-                       }
-                       Err(e) => {
-                           println!("Erro na leitura da query: {}", e);
-                           continue;
-                       }
-                   }
-               },
-               Ok(Signal::CtrlC) => {
-                   println!("Ctrl-C lido. Encerrando...");
-                   break;
-               },
-               x => {
-                   println!("Erro: {:?}", x);
-                   break;
-               }
+                if buffer.trim() == "exit" || buffer.trim() == "quit" || buffer.trim() == "q" {
+                    break;
+                }
+                let query = Query::try_from(buffer);
+                match query {
+                    Ok(query) => {
+                        let start = std::time::Instant::now();
+                        let res = db.run_query(query);
+                        let elapsed = start.elapsed();
+                        println!("Query executada em {:?}", elapsed);
+                        match res {
+                            Ok(res) => print_res(res, &db),
+                            Err(e) => println!("Erro na execução da query: {}", e)
+                        }
+                    }
+                    Err(e) => {
+                        println!("Erro na leitura da query: {}", e);
+                        continue;
+                    }
+                }
+            }
+            Ok(Signal::CtrlC) => {
+                println!("Ctrl-C lido. Encerrando...");
+                break;
+            }
+            x => {
+                println!("Erro: {:?}", x);
+                break;
+            }
             // println!("{:?}", query);
         }
     }
@@ -65,18 +65,17 @@ fn print_res(res: QueryResult, db: &DB) {
         QueryResult::Jogadores(jogadores) => {
             // Create pager
             show_jogadores(&jogadores);
-        },
+        }
         QueryResult::Jogador(jogador) => {
             show_jogador(jogador);
-        },
+        }
         QueryResult::User(user) => {
             show_user(user, db);
-        },
+        }
     }
 }
 
 fn show_jogadores(jogadores: &Vec<JogadorComRating>) {
-
     if jogadores.is_empty() {
         println!("Nenhum jogador encontrado");
         return;
@@ -122,7 +121,7 @@ fn show_jogadores(jogadores: &Vec<JogadorComRating>) {
                             page = page_num;
                         }
                     }
-                },
+                }
                 _ => {
                     println!("Você saiu do pager");
                     break;
