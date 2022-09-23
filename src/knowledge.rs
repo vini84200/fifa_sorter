@@ -1,6 +1,9 @@
 use anyhow::anyhow;
 
-use crate::{models::{Jogador, JogadorComRating, Rating, Tag, User}, Query, structures::{hash_table::HashTable, multi_tst::MultiTst}};
+use crate::{models::{Jogador, JogadorComRating, Rating, Tag, User},
+            parser::Query,
+            structures::{hash_table::HashTable,
+                         multi_tst::MultiTst}};
 use crate::structures::btree::BTree;
 
 const JOGADOR_SIZE: usize = 22807;
@@ -81,10 +84,6 @@ impl JogadoresDB {
             }
         });
     }
-
-    pub fn debug_trie(&self) {
-        self.full_trie.debug();
-    }
 }
 
 struct UsersDB {
@@ -144,11 +143,6 @@ impl DB {
         Ok(())
     }
 
-    pub fn insert_user(&mut self, user: User) -> Result<(), anyhow::Error> {
-        self.users.insert(user)?;
-
-        Ok(())
-    }
 
     pub fn insert_rating(&mut self, rating: Rating) -> Result<(), anyhow::Error> {
         if let Some(user) = self.users.get_mut(rating.get_user_id()) {
@@ -240,8 +234,5 @@ impl DB {
         }
     }
 
-    pub fn debug_trie(&self) {
-        self.jogadores.debug_trie();
-    }
 }
 

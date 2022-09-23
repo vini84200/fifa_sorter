@@ -1,13 +1,12 @@
 use std::borrow::Cow;
-use std::io;
 
-use reedline::{DefaultPrompt, Prompt, PromptEditMode, PromptHistorySearch, Reedline, Signal};
+use reedline::{Prompt, PromptEditMode, PromptHistorySearch, Reedline, Signal};
 use tabled::{Modify, Style, Table, Tabled, Width};
 use tabled::object::Segment;
 
-use crate::{DB, Query};
-use crate::knowledge::QueryResult;
-use crate::models::{JogadorComRating, Rating, User};
+use crate::knowledge::{DB, QueryResult};
+use crate::models::{JogadorComRating, User};
+use crate::parser::Query;
 use crate::reading::initialize;
 
 pub async fn main_loop() {
@@ -83,7 +82,7 @@ fn show_jogadores(jogadores: &Vec<JogadorComRating>) {
     let mut page = 1;
 
     loop {
-        let mut table = Table::new(&jogadores[(page - 1) * 20..std::cmp::min(page * 20, jogadores.len())])
+        let table = Table::new(&jogadores[(page - 1) * 20..std::cmp::min(page * 20, jogadores.len())])
             .with(Style::modern())
             .with(Modify::new(Segment::all()).with(Width::wrap(19)));
 
@@ -218,7 +217,7 @@ impl Prompt for CleanPrompt {
         "".into()
     }
 
-    fn render_prompt_indicator(&self, prompt_mode: PromptEditMode) -> Cow<str> {
+    fn render_prompt_indicator(&self, _prompt_mode: PromptEditMode) -> Cow<str> {
         " ".into()
     }
 
@@ -226,7 +225,7 @@ impl Prompt for CleanPrompt {
         "| ".into()
     }
 
-    fn render_prompt_history_search_indicator(&self, history_search: PromptHistorySearch) -> Cow<str> {
+    fn render_prompt_history_search_indicator(&self, _history_search: PromptHistorySearch) -> Cow<str> {
         "? ".into()
     }
 }
@@ -246,7 +245,7 @@ impl Prompt for PagerPrompt {
         format!("Página {}/{}", self.page, self.max_page).into()
     }
 
-    fn render_prompt_indicator(&self, prompt_mode: PromptEditMode) -> Cow<str> {
+    fn render_prompt_indicator(&self, _prompt_mode: PromptEditMode) -> Cow<str> {
         " ".into()
     }
 
@@ -254,7 +253,7 @@ impl Prompt for PagerPrompt {
         "| ".into()
     }
 
-    fn render_prompt_history_search_indicator(&self, history_search: PromptHistorySearch) -> Cow<str> {
+    fn render_prompt_history_search_indicator(&self, _history_search: PromptHistorySearch) -> Cow<str> {
         "?".into()
     }
 }

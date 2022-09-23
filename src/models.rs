@@ -1,6 +1,5 @@
 use std::fmt::{Display, Formatter};
 
-use anyhow::anyhow;
 use serde::Deserialize;
 use tabled::Tabled;
 
@@ -37,7 +36,7 @@ impl Display for Positons {
 
 
 impl Display for Tags {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut tags = String::new();
         for tag in self.0.iter() {
             tags.push_str(&format!("'{}', ", tag));
@@ -57,7 +56,7 @@ impl From<Jogador> for JogadorComRating {
     fn from(jogador: Jogador) -> Self {
         JogadorComRating {
             nome: jogador.name,
-            posicoes: Positons { player_positions: jogador.player_positions.split(",").map(|s| s.trim().to_string()).collect() },
+            posicoes: Positons { player_positions: jogador.player_positions.split(',').map(|s| s.trim().to_string()).collect() },
             nota: 0.0,
             avaliacoes: 0,
             tags: Tags::default(),
@@ -67,17 +66,6 @@ impl From<Jogador> for JogadorComRating {
 }
 
 impl JogadorComRating {
-    pub fn new(name: String, player_positions: String, id: u32) -> Self {
-        JogadorComRating {
-            nome: name,
-            posicoes: Positons { player_positions: player_positions.split(",").map(|s| s.trim().to_string()).collect() },
-            nota: 0.0,
-            avaliacoes: 0,
-            tags: Tags(Vec::new()),
-            id: id,
-        }
-    }
-
     pub fn add_rating(&mut self, rating: f32) {
         self.nota = (self.nota * self.avaliacoes as f32 + rating)
             / (self.avaliacoes + 1) as f32;
@@ -85,7 +73,7 @@ impl JogadorComRating {
     }
 
     pub fn add_tag(&mut self, tag: Tag) {
-        if !self.tags.0.contains(&tag.get_tag()) {
+        if !self.tags.0.contains(tag.get_tag()) {
             self.tags.0.push(tag.get_tag().clone());
         }
     }
@@ -116,13 +104,6 @@ impl JogadorComRating {
 }
 
 impl Jogador {
-    pub fn new(sofifa_id: u32, name: String, player_positions: String) -> Self {
-        Jogador {
-            sofifa_id,
-            name,
-            player_positions,
-        }
-    }
 
     pub fn get_id(&self) -> u32 {
         self.sofifa_id
@@ -142,13 +123,6 @@ pub struct Rating {
 }
 
 impl Rating {
-    fn new(user_id: u32, sofifa_id: u32, rating: f32) -> Self {
-        Rating {
-            user_id,
-            sofifa_id,
-            rating,
-        }
-    }
 
     pub fn get_user_id(&self) -> u32 {
         self.user_id
@@ -170,10 +144,6 @@ pub struct User {
 }
 
 impl User {
-    pub fn new(ratings: Vec<Rating>, id: u32) -> Self {
-        User { ratings, id }
-    }
-
     pub fn from_rating(rating: Rating) -> Self {
         User {
             ratings: vec![rating.clone()],
@@ -201,9 +171,6 @@ pub struct Tag {
 }
 
 impl Tag {
-    pub fn new(sofifa_id: u32, tag: String) -> Self {
-        Tag { sofifa_id, tag }
-    }
 
     pub fn get_id(&self) -> u32 {
         self.sofifa_id

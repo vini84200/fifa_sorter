@@ -1,7 +1,7 @@
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use csv::Reader;
 
-use crate::{knowledge::DB, structures::{hash_table::HashTable, tst::Tst}};
+use crate::knowledge::DB;
 use crate::models::*;
 
 #[allow(dead_code)]

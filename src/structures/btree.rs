@@ -26,7 +26,7 @@ impl<K, V> Node<K, V>
         V: Clone
 {
     const ORDER: usize = (PAGE - size_of::<Node<K, V>>()) / (size_of::<K>() + size_of::<V>());
-    const MIN_KEYS: usize = (Self::ORDER - 1) / 2;
+    const _MIN_KEYS: usize = (Self::ORDER - 1) / 2;
     const MAX_KEYS: usize = Self::ORDER - 1;
 
     const MID_KEYS: usize = (Self::ORDER - 1) / 2;
@@ -34,9 +34,9 @@ impl<K, V> Node<K, V>
     fn new(_keys: Option<Vec<K>>, _values: Option<Vec<V>>, _children: Option<Vec<Node<K, V>>>) -> Self {
         assert!(Self::ORDER > 2);
         Node {
-            keys: _keys.unwrap_or(Vec::with_capacity(Self::MAX_KEYS)),
-            values: _values.unwrap_or(Vec::with_capacity(Self::MAX_KEYS)),
-            children: _children.unwrap_or(Vec::with_capacity(Self::MAX_KEYS + 1)),
+            keys: _keys.unwrap_or_else(|| Vec::with_capacity(Self::MAX_KEYS)),
+            values: _values.unwrap_or_else(|| Vec::with_capacity(Self::MAX_KEYS)),
+            children: _children.unwrap_or_else(|| Vec::with_capacity(Self::MAX_KEYS + 1)),
         }
     }
 
@@ -44,18 +44,18 @@ impl<K, V> Node<K, V>
         self.children.is_empty()
     }
 
-    pub fn get_all(&self) -> Vec<(K, V)> {
+    pub fn _get_all(&self) -> Vec<(K, V)> {
         let mut res = Vec::new();
         for i in 0..self.keys.len() {
             if self.is_leaf() {
                 res.push((self.keys[i].clone(), self.values[i].clone()));
             } else {
-                res.append(&mut self.children[i].get_all());
+                res.append(&mut self.children[i]._get_all());
                 res.push((self.keys[i].clone(), self.values[i].clone()));
             }
         }
         if !self.is_leaf() {
-            res.append(&mut self.children[self.keys.len()].get_all());
+            res.append(&mut self.children[self.keys.len()]._get_all());
         }
         res
     }
@@ -226,17 +226,17 @@ mod tests {
     use super::*;
 
     #[derive(Clone, Eq, PartialEq)]
-    struct BIG {
+    struct BigStruct {
         a: [u8; 500],
     }
 
-    impl Default for BIG {
+    impl Default for BigStruct {
         fn default() -> Self {
-            BIG { a: [0; 500] }
+            BigStruct { a: [0; 500] }
         }
     }
 
-    impl Debug for BIG {
+    impl Debug for BigStruct {
         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
             write!(f, "BIG {{ a: [{}; 500] }}", self.a[0])
         }
@@ -256,17 +256,17 @@ mod tests {
     #[test]
     fn insert_big() {
         let mut tree = BTree::new();
-        tree.insert(1, BIG { a: [0; 500] });
-        tree.insert(2, BIG { a: [0; 500] });
-        tree.insert(3, BIG { a: [0; 500] });
-        tree.insert(4, BIG { a: [0; 500] });
-        tree.insert(5, BIG { a: [0; 500] });
-        tree.insert(7, BIG { a: [0; 500] });
-        tree.insert(6, BIG { a: [0; 500] });
-        tree.insert(8, BIG { a: [0; 500] });
-        tree.insert(-1, BIG { a: [0; 500] });
-        tree.insert(0, BIG { a: [0; 500] });
-        println!("Order: {:#?} - MAX: {} - MIN : {}", Node::<i32, BIG>::ORDER, Node::<i32, BIG>::MAX_KEYS, Node::<i32, BIG>::MIN_KEYS);
+        tree.insert(1, BigStruct { a: [0; 500] });
+        tree.insert(2, BigStruct { a: [0; 500] });
+        tree.insert(3, BigStruct { a: [0; 500] });
+        tree.insert(4, BigStruct { a: [0; 500] });
+        tree.insert(5, BigStruct { a: [0; 500] });
+        tree.insert(7, BigStruct { a: [0; 500] });
+        tree.insert(6, BigStruct { a: [0; 500] });
+        tree.insert(8, BigStruct { a: [0; 500] });
+        tree.insert(-1, BigStruct { a: [0; 500] });
+        tree.insert(0, BigStruct { a: [0; 500] });
+        println!("Order: {:#?} - MAX: {} - MIN : {}", Node::<i32, BigStruct>::ORDER, Node::<i32, BigStruct>::MAX_KEYS, Node::<i32, BigStruct>::_MIN_KEYS);
 
         println!("{:#?}", tree);
     }
@@ -289,26 +289,26 @@ mod tests {
     #[test]
     fn find_big() {
         let mut tree = BTree::new();
-        tree.insert(1, BIG { a: [2; 500] });
-        tree.insert(2, BIG { a: [0; 500] });
-        tree.insert(3, BIG { a: [0; 500] });
-        tree.insert(4, BIG { a: [0; 500] });
-        tree.insert(5, BIG { a: [0; 500] });
-        tree.insert(7, BIG { a: [6; 500] });
-        tree.insert(6, BIG { a: [0; 500] });
-        tree.insert(8, BIG { a: [0; 500] });
-        tree.insert(-1, BIG { a: [0; 500] });
-        tree.insert(0, BIG { a: [0; 500] });
-        println!("Order: {:#?} - MAX: {} - MIN : {}", Node::<i32, BIG>::ORDER, Node::<i32, BIG>::MAX_KEYS, Node::<i32, BIG>::MIN_KEYS);
+        tree.insert(1, BigStruct { a: [2; 500] });
+        tree.insert(2, BigStruct { a: [0; 500] });
+        tree.insert(3, BigStruct { a: [0; 500] });
+        tree.insert(4, BigStruct { a: [0; 500] });
+        tree.insert(5, BigStruct { a: [0; 500] });
+        tree.insert(7, BigStruct { a: [6; 500] });
+        tree.insert(6, BigStruct { a: [0; 500] });
+        tree.insert(8, BigStruct { a: [0; 500] });
+        tree.insert(-1, BigStruct { a: [0; 500] });
+        tree.insert(0, BigStruct { a: [0; 500] });
+        println!("Order: {:#?} - MAX: {} - MIN : {}", Node::<i32, BigStruct>::ORDER, Node::<i32, BigStruct>::MAX_KEYS, Node::<i32, BigStruct>::_MIN_KEYS);
 
-        assert_eq!(tree.find(1), Some(&BIG { a: [2; 500] }));
-        assert_eq!(tree.find(2), Some(&BIG { a: [0; 500] }));
-        assert_eq!(tree.find(3), Some(&BIG { a: [0; 500] }));
-        assert_eq!(tree.find(4), Some(&BIG { a: [0; 500] }));
-        assert_eq!(tree.find(5), Some(&BIG { a: [0; 500] }));
-        assert_eq!(tree.find(6), Some(&BIG { a: [0; 500] }));
-        assert_eq!(tree.find(7), Some(&BIG { a: [6; 500] }));
-        assert_eq!(tree.find(8), Some(&BIG { a: [0; 500] }));
+        assert_eq!(tree.find(1), Some(&BigStruct { a: [2; 500] }));
+        assert_eq!(tree.find(2), Some(&BigStruct { a: [0; 500] }));
+        assert_eq!(tree.find(3), Some(&BigStruct { a: [0; 500] }));
+        assert_eq!(tree.find(4), Some(&BigStruct { a: [0; 500] }));
+        assert_eq!(tree.find(5), Some(&BigStruct { a: [0; 500] }));
+        assert_eq!(tree.find(6), Some(&BigStruct { a: [0; 500] }));
+        assert_eq!(tree.find(7), Some(&BigStruct { a: [6; 500] }));
+        assert_eq!(tree.find(8), Some(&BigStruct { a: [0; 500] }));
         assert_eq!(tree.find(9), None);
     }
 
@@ -336,22 +336,22 @@ mod tests {
     #[test]
     fn get_greatest_n_big() {
         let mut tree = BTree::new();
-        tree.insert(1, BIG { a: [2; 500] });
-        tree.insert(2, BIG { a: [0; 500] });
-        tree.insert(3, BIG { a: [0; 500] });
-        tree.insert(4, BIG { a: [0; 500] });
-        tree.insert(5, BIG { a: [0; 500] });
-        tree.insert(7, BIG { a: [6; 500] });
-        tree.insert(6, BIG { a: [0; 500] });
-        tree.insert(8, BIG { a: [9; 500] });
-        tree.insert(-1, BIG { a: [0; 500] });
-        tree.insert(0, BIG { a: [0; 500] });
-        println!("Order: {:#?} - MAX: {} - MIN : {}", Node::<i32, BIG>::ORDER, Node::<i32, BIG>::MAX_KEYS, Node::<i32, BIG>::MIN_KEYS);
+        tree.insert(1, BigStruct { a: [2; 500] });
+        tree.insert(2, BigStruct { a: [0; 500] });
+        tree.insert(3, BigStruct { a: [0; 500] });
+        tree.insert(4, BigStruct { a: [0; 500] });
+        tree.insert(5, BigStruct { a: [0; 500] });
+        tree.insert(7, BigStruct { a: [6; 500] });
+        tree.insert(6, BigStruct { a: [0; 500] });
+        tree.insert(8, BigStruct { a: [9; 500] });
+        tree.insert(-1, BigStruct { a: [0; 500] });
+        tree.insert(0, BigStruct { a: [0; 500] });
+        println!("Order: {:#?} - MAX: {} - MIN : {}", Node::<i32, BigStruct>::ORDER, Node::<i32, BigStruct>::MAX_KEYS, Node::<i32, BigStruct>::_MIN_KEYS);
 
-        assert_eq!(tree.get_greatest_n(3), vec![BIG { a: [9; 500] }, BIG { a: [6; 500] }, BIG { a: [0; 500] }]);
-        assert_eq!(tree.get_greatest_n(5), vec![BIG { a: [9; 500] }, BIG { a: [6; 500] }, BIG { a: [0; 500] }, BIG { a: [0; 500] }, BIG { a: [0; 500] }]);
+        assert_eq!(tree.get_greatest_n(3), vec![BigStruct { a: [9; 500] }, BigStruct { a: [6; 500] }, BigStruct { a: [0; 500] }]);
+        assert_eq!(tree.get_greatest_n(5), vec![BigStruct { a: [9; 500] }, BigStruct { a: [6; 500] }, BigStruct { a: [0; 500] }, BigStruct { a: [0; 500] }, BigStruct { a: [0; 500] }]);
         assert_eq!(tree.get_greatest_n(0), vec![]);
 
-        assert_eq!(tree.get_greatest_n(1), vec![BIG { a: [9; 500] }]);
+        assert_eq!(tree.get_greatest_n(1), vec![BigStruct { a: [9; 500] }]);
     }
 }

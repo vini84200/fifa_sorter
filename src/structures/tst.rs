@@ -83,23 +83,19 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
             if self.c == c {
                 if last {
                     self.content.clone()
-                } else {
-                    if let Some(next) = &self.next {
-                        next._get(word, scanned + 1)
-                    } else { None }
-                }
+                } else if let Some(next) = &self.next {
+                    next._get(word, scanned + 1)
+                } else { None }
             } else if c < self.c {
                 if let Some(a) = &self.esq {
                     a._get(word, scanned)
                 } else {
                     None
                 }
+            } else if let Some(a) = &self.dir {
+                a._get(word, scanned)
             } else {
-                if let Some(a) = &self.dir {
-                    a._get(word, scanned)
-                } else {
-                    None
-                }
+                None
             }
         } else {
             None
@@ -111,17 +107,13 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
         self._find_from_prefix(prefix, 0)
     }
 
-    pub fn get_child_words(&self) -> Vec<(String, T)> {
-        self._get_child_words("".to_string())
-    }
-
     fn _get_child_words(&self, prefix: String) -> Vec<(String, T)> {
         let mut words = vec![];
         if let Some(content) = &self.content {
             words.push((prefix.clone() + &self.c.to_string(), content.clone()));
         }
         if let Some(next) = &self.next {
-            words.append(&mut next._get_words(prefix.clone()));
+            words.append(&mut next._get_words(prefix));
         }
         words
     }
@@ -144,7 +136,7 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
         }
 
         if let Some(dir) = &self.dir {
-            words.append(&mut dir._get_words(prefix.clone()));
+            words.append(&mut dir._get_words(prefix));
         }
 
         words
@@ -156,23 +148,19 @@ impl<T> TstNode<T> where T: Default + Debug + Clone {
             if self.c == c {
                 if last {
                     self._get_child_words(prefix)
-                } else {
-                    if let Some(next) = &self.next {
-                        next._find_from_prefix(prefix, scanned + 1)
-                    } else { vec![] }
-                }
+                } else if let Some(next) = &self.next {
+                    next._find_from_prefix(prefix, scanned + 1)
+                } else { vec![] }
             } else if c < self.c {
                 if let Some(a) = &self.esq {
                     a._find_from_prefix(prefix, scanned)
                 } else {
                     vec![]
                 }
+            } else if let Some(a) = &self.dir {
+                a._find_from_prefix(prefix, scanned)
             } else {
-                if let Some(a) = &self.dir {
-                    a._find_from_prefix(prefix, scanned)
-                } else {
-                    vec![]
-                }
+                vec![]
             }
         } else {
             vec![]
@@ -223,7 +211,7 @@ impl<T> Tst<T> where T: Clone + Default + Debug {
         }
     }
 
-    pub fn insert(&mut self, word: &String, content: T) -> Result<()> {
+    pub fn insert(&mut self, word: &str, content: T) -> Result<()> {
         self.root.insert(word, content)
     }
 
@@ -342,7 +330,7 @@ mod tests {
     }
 
     #[test]
-    fn test_case_nonsesitive() {
+    fn test_not_case_sensitive() {
         let mut tst = Tst::<i32>::new();
         tst.insert(&String::from("bola"), 1).unwrap();
         tst.insert(&String::from("bOlo"), 5).unwrap();
