@@ -6,8 +6,8 @@ use super::tst::Tst;
 
 #[derive(Clone, Debug, Default)]
 pub struct MultiTst<T>
-    where
-        T: Debug + Clone + Default,
+where
+    T: Debug + Clone + Default,
 {
     tst: Tst<Vec<T>>,
 }

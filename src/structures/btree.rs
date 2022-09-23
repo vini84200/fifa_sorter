@@ -155,9 +155,9 @@ impl BTreeProps {
 }
 
 impl<K, V> Default for BTree<K, V>
-    where
-        K: PartialOrd + Copy + Default,
-        V: Default + Clone,
+where
+    K: PartialOrd + Copy + Default,
+    V: Default + Clone,
 {
     fn default() -> Self {
         BTree {

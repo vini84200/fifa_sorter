@@ -5,8 +5,8 @@ use anyhow::Result;
 
 #[derive(Debug, Clone)]
 struct TstNode<T>
-    where
-        T: Default + Debug,
+where
+    T: Default + Debug,
 {
     esq: Option<Box<TstNode<T>>>,
     dir: Option<Box<TstNode<T>>>,
