@@ -5,7 +5,7 @@ use crate::knowledge::DB;
 use crate::models::*;
 
 #[allow(dead_code)]
-pub async fn read_tags(db: &mut DB) -> Result<(), anyhow::Error> {
+pub fn read_tags(db: &mut DB) -> Result<(), anyhow::Error> {
     let mut tag_reader = Reader::from_path("data/tags.csv")?;
 
     tag_reader
@@ -20,7 +20,7 @@ pub async fn read_tags(db: &mut DB) -> Result<(), anyhow::Error> {
 }
 
 #[allow(dead_code)]
-pub async fn read_rating(db: &mut DB) -> Result<(), anyhow::Error> {
+pub fn read_rating(db: &mut DB) -> Result<(), anyhow::Error> {
     let mut reader = Reader::from_path("data/rating.csv")?;
     let mut count = 0;
     for result in reader.deserialize() {
@@ -35,7 +35,7 @@ pub async fn read_rating(db: &mut DB) -> Result<(), anyhow::Error> {
 }
 
 #[allow(dead_code)]
-pub async fn read_jogadores(db: &mut DB) -> Result<(), anyhow::Error> {
+pub fn read_jogadores(db: &mut DB) -> Result<(), anyhow::Error> {
     let mut reader = Reader::from_path("data/players.csv")?;
     reader
         .deserialize()
@@ -47,15 +47,11 @@ pub async fn read_jogadores(db: &mut DB) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-pub async fn initialize(db: &mut DB) -> Result<()> {
-    let start = std::time::Instant::now();
-    read_jogadores(db).await?;
-    read_rating(db).await?;
-    read_tags(db).await?;
+pub fn initialize(db: &mut DB) -> Result<()> {
+    read_jogadores(db)?;
+    read_rating(db)?;
+    read_tags(db)?;
 
     db.finish_init();
-
-    let elapsed = start.elapsed();
-    println!("Time elapsed in initialization is: {:?}", elapsed);
     Ok(())
 }

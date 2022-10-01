@@ -9,12 +9,11 @@ pub mod structures;
 #[cfg(feature = "terminal")]
 mod terminal;
 
-#[tokio::main]
-async fn main() -> Result<()> {
+fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
 
     #[cfg(feature = "terminal")]
-    terminal::main_loop().await;
+    terminal::main_loop();
 
     // Run if feature gui
     // TODO: Implement GUI

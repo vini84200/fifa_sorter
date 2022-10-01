@@ -14,19 +14,14 @@ opt-level = 3
 serde = { version = "1", features = ["derive"] }
 anyhow = "1"
 chrono = { version = "0.4", features = ["serde"] }
-rand = { version = "0.8.5", default-features = false, features = ["std"] }
-tokio = { version = "1", features = ["full"] }
 
 log = "0.4"
 csv = "1.1"
-tracing = "0.1"
-tracing-log = "0.1"
-chumsky = "0.8.0"
 #TODO: iced = "0.4"
 tracing-subscriber = "0.3"
 reedline = { version = "0.11.0", optional = true }
 tabled = { version = "0.8", optional = true }
-term_size = { version = "1.0.0-beta1", optional = true }
+terminal_size = { version = "0.2.1", optional = true }
 [features]
 default = ["terminal"]
-terminal = ["reedline", "tabled", "term_size"]
+terminal = ["reedline", "tabled", "terminal_size"]

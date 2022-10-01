@@ -9,14 +9,19 @@ use crate::models::{JogadorComRating, User};
 use crate::parser::Query;
 use crate::reading::initialize;
 
-pub async fn main_loop() {
+pub fn main_loop() {
     println!("Inicializando...");
     let start = std::time::Instant::now();
     let mut db = DB::new();
-    initialize(&mut db).await.unwrap();
+    initialize(&mut db).unwrap();
     let elapsed = start.elapsed();
     println!("Inicializado em {:?}", elapsed);
-
+    let size = terminal_size::terminal_size();
+    if size.is_none() {
+        println!("WARN: Não foi possível determinar o tamanho do terminal. A tabela pode ficar quebrada.");
+    } else if size.unwrap().0.0 < 100 {
+        println!("WARN: O tamanho do terminal é muito pequeno. A tabela pode ficar quebrada.");
+    }
     let mut line_editor = Reedline::create();
     let prompt = CleanPrompt::default();
     loop {
@@ -49,7 +54,7 @@ pub async fn main_loop() {
                 }
             }
             Ok(Signal::CtrlC) => {
-                println!("Ctrl-C lido. Encerrando...");
+                println!("Encerrando...");
                 break;
             }
             x => {
@@ -81,12 +86,14 @@ fn show_jogadores(jogadores: &Vec<JogadorComRating>) {
         return;
     }
     let mut page = 1;
+    let term_size = terminal_size::terminal_size();
+    let term_width = if term_size.is_some() { term_size.unwrap().0.0 as usize } else { 100 };
 
     loop {
         let table =
             Table::new(&jogadores[(page - 1) * 20..std::cmp::min(page * 20, jogadores.len())])
                 .with(Style::modern())
-                .with(Modify::new(Segment::all()).with(Width::wrap(19)));
+                .with(Modify::new(Segment::all()).with(Width::wrap(term_width/6)));
 
         println!("{}", table);
         let max_pages = (jogadores.len() as f32 / 20.0).ceil() as u32;
