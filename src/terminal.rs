@@ -90,10 +90,10 @@ fn show_jogadores(jogadores: &Vec<JogadorComRating>) {
     let term_width = if term_size.is_some() { term_size.unwrap().0.0 as usize } else { 100 };
 
     loop {
-        let table =
-            Table::new(&jogadores[(page - 1) * 20..std::cmp::min(page * 20, jogadores.len())])
-                .with(Style::modern())
-                .with(Modify::new(Segment::all()).with(Width::wrap(term_width/6)));
+        let mut table =
+            Table::new(&jogadores[(page - 1) * 20..std::cmp::min(page * 20, jogadores.len())]);
+        table.with(Style::modern());
+        table.with(Modify::new(Segment::all()).with(Width::wrap(term_width/6)));
 
         println!("{}", table);
         let max_pages = (jogadores.len() as f32 / 20.0).ceil() as u32;
@@ -212,9 +212,9 @@ fn show_user(user: User, db: &DB) {
     ratings.reverse();
     let ratings = &ratings[..std::cmp::min(20, ratings.len())];
 
-    let table = Table::new(ratings)
-        .with(Style::modern())
-        .with(Modify::new(Segment::all()).with(Width::wrap(19)));
+    let mut table = Table::new(ratings);
+    table.with(Style::modern());
+    table.with(Modify::new(Segment::all()).with(Width::wrap(19)));
     println!("{}", table);
 }
 
