@@ -122,7 +122,6 @@ jobs:
   build:
     needs:
       - version
-      - lints
       - test
       - check
     runs-on: '${{ matrix.os }}'
