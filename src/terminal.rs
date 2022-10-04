@@ -16,12 +16,6 @@ pub fn main_loop() {
     initialize(&mut db).unwrap();
     let elapsed = start.elapsed();
     println!("Inicializado em {:?}", elapsed);
-    let size = terminal_size::terminal_size();
-    if size.is_none() {
-        println!("WARN: Não foi possível determinar o tamanho do terminal. A tabela pode ficar quebrada.");
-    } else if size.unwrap().0.0 < 100 {
-        println!("WARN: O tamanho do terminal é muito pequeno. A tabela pode ficar quebrada.");
-    }
     let mut line_editor = Reedline::create();
     let prompt = CleanPrompt::default();
     loop {
@@ -86,8 +80,7 @@ fn show_jogadores(jogadores: &Vec<JogadorComRating>) {
         return;
     }
     let mut page = 1;
-    let term_size = terminal_size::terminal_size();
-    let term_width = if term_size.is_some() { term_size.unwrap().0.0 as usize } else { 100 };
+    let term_width = 100;
 
     loop {
         let mut table =

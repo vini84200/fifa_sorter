@@ -10,7 +10,6 @@ pub mod structures;
 mod terminal;
 
 fn main() -> Result<()> {
-    tracing_subscriber::fmt::init();
 
     #[cfg(feature = "terminal")]
     terminal::main_loop();
