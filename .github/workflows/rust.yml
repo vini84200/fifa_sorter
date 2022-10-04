@@ -131,12 +131,18 @@ jobs:
           - os: macos-latest
             target: x86_64-apple-darwin
             suffix: ''
+            flag: ''
+            extraargs: ''
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             suffix: ''
+            flag: '-C target-feature=+crt-static'
+            extraargs: '--target x86_64-unknown-linux-gnu '
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             suffix: .exe
+            flag: ''
+            extraargs: ''
     steps:
       - uses: actions/checkout@master
         with:
@@ -171,9 +177,11 @@ jobs:
         env:
           VERSION: '${{ steps.get_version.outputs.VERSION }}'
           REPOSITORY_NAME: '${{ steps.get_repository_name.outputs.REPOSITORY_NAME }}'
+          RUSTFLAGS: '${{matrix.flag}}'
+
         with:
           command: build
-          args: '--release'
+          args: '--release ${{matrix.extraargs}}'
       - uses: actions/upload-artifact@master
         with:
           name: ${{ steps.get_repository_name.outputs.REPOSITORY_NAME }}-${{ matrix.target }}
