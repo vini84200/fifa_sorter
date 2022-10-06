@@ -36,11 +36,10 @@ impl Display for Positons {
 
 impl Display for Tags {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let mut tags = String::new();
-        for tag in self.0.iter() {
-            tags.push_str(&format!("'{}', ", tag));
+        for tag in &self.0 {
+            write!(f, "'{}', ", tag)?;
         }
-        write!(f, "{}", tags)
+        Ok(())
     }
 }
 
@@ -75,7 +74,7 @@ impl JogadorComRating {
         self.avaliacoes += 1;
     }
 
-    pub fn add_tag(&mut self, tag: Tag) {
+    pub fn add_tag(&mut self, tag: &Tag) {
         if !self.tags.0.contains(tag.get_tag()) {
             self.tags.0.push(tag.get_tag().clone());
         }

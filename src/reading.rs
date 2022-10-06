@@ -12,7 +12,7 @@ pub fn read_tags(db: &mut DB) -> Result<(), anyhow::Error> {
         .deserialize()
         .try_for_each(|tag| -> Result<(), anyhow::Error> {
             let tag: Tag = tag?;
-            db.insert_tag(tag)?;
+            db.insert_tag(&tag)?;
             Ok(())
         })?;
 
@@ -25,9 +25,9 @@ pub fn read_rating(db: &mut DB) -> Result<(), anyhow::Error> {
     let mut count = 0;
     for result in reader.deserialize() {
         let rating: Rating = result?;
-        db.insert_rating(rating)?;
+        db.insert_rating(&rating)?;
         count += 1;
-        if count % 1000000 == 0 {
+        if count % 1_000_000 == 0 {
             // println!("{} ratings read", count);
         }
     }
@@ -41,7 +41,7 @@ pub fn read_jogadores(db: &mut DB) -> Result<(), anyhow::Error> {
         .deserialize()
         .try_for_each(|record| -> Result<(), anyhow::Error> {
             let jogador: Jogador = record?;
-            db.insert_jogador(jogador)?;
+            db.insert_jogador(&jogador)?;
             Ok(())
         })?;
     Ok(())

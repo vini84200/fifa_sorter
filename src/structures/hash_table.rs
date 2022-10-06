@@ -92,7 +92,7 @@ where
 
     pub fn get_mut_or_default(&mut self, key: &K) -> Result<&mut V> {
         if self.get(key).is_some() {
-            Ok(self.get_mut(key).unwrap())
+            self.get_mut(key).ok_or_else(|| anyhow!("Error getting item"))
         } else {
             self.insert(key, Default::default())?;
             self.get_mut(key)

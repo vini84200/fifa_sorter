@@ -7,9 +7,9 @@ use crate::{
     structures::{hash_table::HashTable, multi_tst::MultiTst},
 };
 
-const JOGADOR_SIZE: usize = 22807;
-const TAG_SIZE: usize = 438001;
-const USER_SIZE: usize = 200001;
+const JOGADOR_SIZE: usize = 22_807;
+const TAG_SIZE: usize = 438_001;
+const USER_SIZE: usize = 200_001;
 
 struct JogadoresDB {
     ht: HashTable<u32, JogadorComRating>,
@@ -33,7 +33,7 @@ impl JogadoresDB {
         }
     }
 
-    fn insert(&mut self, jogador: Jogador) -> Result<(), anyhow::Error> {
+    fn insert(&mut self, jogador: &Jogador) -> Result<(), anyhow::Error> {
         // println!("Inserting jogador {} - {}", jogador.get_id(), jogador.get_name());
         self.ht
             .insert(&jogador.get_id(), JogadorComRating::from(jogador.clone()))?;
@@ -55,7 +55,7 @@ impl JogadoresDB {
             .collect()
     }
 
-    fn insert_tag(&mut self, tag: Tag) -> Result<(), anyhow::Error> {
+    fn insert_tag(&mut self, tag: &Tag) -> Result<(), anyhow::Error> {
         if let Some(jogadores) = self.tag.get_mut(&tag.get_tag().to_lowercase()) {
             jogadores.push(tag.get_id());
         } else {
@@ -66,10 +66,10 @@ impl JogadoresDB {
         Ok(())
     }
 
-    fn add_rating(&mut self, rating: Rating) -> Result<(), anyhow::Error> {
+    fn add_rating(&mut self, rating: &Rating) -> Result<(), anyhow::Error> {
         self.ht
             .get_mut(&rating.get_sofifa_id())
-            .unwrap()
+            .ok_or_else(|| anyhow!("Jogador não encontrado"))?
             .add_rating(rating.get_rating());
         Ok(())
     }
@@ -143,15 +143,15 @@ impl DB {
         DB { jogadores, users }
     }
 
-    pub fn insert_jogador(&mut self, jogador: Jogador) -> Result<(), anyhow::Error> {
+    pub fn insert_jogador(&mut self, jogador: &Jogador) -> Result<(), anyhow::Error> {
         self.jogadores.insert(jogador)?;
 
         Ok(())
     }
 
-    pub fn insert_rating(&mut self, rating: Rating) -> Result<(), anyhow::Error> {
+    pub fn insert_rating(&mut self, rating: &Rating) -> Result<(), anyhow::Error> {
         if let Some(user) = self.users.get_mut(rating.get_user_id()) {
-            user.add_rating(&rating);
+            user.add_rating(rating);
         } else {
             self.users.insert(User::from_rating(rating.clone()))?;
         }
@@ -172,7 +172,7 @@ impl DB {
         self.jogadores.search(name)
     }
 
-    pub fn insert_tag(&mut self, tag: Tag) -> Result<(), anyhow::Error> {
+    pub fn insert_tag(&mut self, tag: &Tag) -> Result<(), anyhow::Error> {
         self.jogadores.insert_tag(tag)?;
 
         Ok(())
@@ -204,7 +204,7 @@ impl DB {
                     .jogadores
                     .pos_ht
                     .get(&position)
-                    .unwrap()
+                    .ok_or_else(|| anyhow!("Position not found"))?
                     .get_greatest_n(n as u32)
                     .iter()
                     .map(|a| self.jogadores.get(*a).unwrap())
